@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +29,7 @@ public class RecordAudioFragment extends Fragment {
 
 	private String currentOutFile;
 	private MediaRecorder myAudioRecorder;
+	private MediaPlayer mySoundOuput;
 
 	private boolean isRecording;
 	private RecorderVisualizerView visualizerView;
@@ -303,6 +305,22 @@ public class RecordAudioFragment extends Fragment {
 						return false;
 					}
 				});
+
+		rootView.findViewById(R.id.sound_output).setOnTouchListener(
+				new OnTouchListener() {
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+
+						Toast.makeText(getActivity(), "sound_output",
+								Toast.LENGTH_SHORT).show();
+
+						mySoundOuput = new MediaPlayer();
+
+						return false;
+					}
+				}
+
+		);
 
 		rootView.setFocusableInTouchMode(true);
 		rootView.requestFocus();
