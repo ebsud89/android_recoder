@@ -5,6 +5,9 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.media.AudioFormat;
+import android.media.AudioManager;
+import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Bundle;
@@ -38,6 +41,16 @@ public class RecordAudioFragment extends Fragment {
 	private boolean doubleBackToExitPressedOnce;
 	private Handler mHandler = new Handler();
 
+	// play PCM Sound
+	private final int duration = 3; // seconds
+	private final int sampleRate = 8000;
+	private final int numSamples = duration * sampleRate;
+	private final double sample[] = new double[numSamples];
+	private final double freqOfTone = 15000; // hz
+	private final byte generatedSnd[] = new byte[2 * numSamples];
+
+	Handler soundhandler = new Handler();
+
 	private final Runnable mRunnable = new Runnable() {
 		@Override
 		public void run() {
@@ -69,96 +82,7 @@ public class RecordAudioFragment extends Fragment {
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
 
-						Helper.getHelperInstance().makeHepticFeedback(
-								getActivity());
-
-						if (Helper.getHelperInstance().createRecordingFolder()) {
-
-							SimpleDateFormat dateFormat = new SimpleDateFormat(
-									"yyyyMMdd_HH_mm_ss");
-							String currentTimeStamp = dateFormat
-									.format(new Date());
-
-							currentOutFile = Helper.RECORDING_PATH
-									+ "/recording_" + currentTimeStamp + ".3gp";
-
-							myAudioRecorder = new MediaRecorder();
-							myAudioRecorder
-									.setAudioSource(MediaRecorder.AudioSource.MIC);
-							myAudioRecorder
-									.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
-							myAudioRecorder
-									.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
-							myAudioRecorder.setOutputFile(currentOutFile);
-
-							try {
-
-								myAudioRecorder.prepare();
-								myAudioRecorder.start();
-
-								Toast.makeText(
-										getActivity(),
-										getActivity().getResources().getString(
-												R.string.rec_start),
-										Toast.LENGTH_LONG).show();
-
-								rootView.findViewById(R.id.start_recording)
-										.setEnabled(false);
-								rootView.findViewById(R.id.stop_recording)
-										.setEnabled(true);
-								rootView.findViewById(R.id.delete_recording)
-										.setEnabled(false);
-
-								isRecording = true;
-
-								handler.post(updateVisualizer);
-							}
-
-							catch (IllegalStateException e) {
-								Toast.makeText(
-										getActivity(),
-										getActivity().getResources().getString(
-												R.string.rec_fail),
-										Toast.LENGTH_LONG).show();
-								e.printStackTrace();
-
-								rootView.findViewById(R.id.start_recording)
-										.setEnabled(true);
-								rootView.findViewById(R.id.stop_recording)
-										.setEnabled(false);
-								rootView.findViewById(R.id.delete_recording)
-										.setEnabled(true);
-
-								isRecording = false;
-							}
-
-							catch (IOException e) {
-								Toast.makeText(
-										getActivity(),
-										getActivity().getResources().getString(
-												R.string.rec_fail),
-										Toast.LENGTH_LONG).show();
-								e.printStackTrace();
-
-								rootView.findViewById(R.id.start_recording)
-										.setEnabled(true);
-								rootView.findViewById(R.id.stop_recording)
-										.setEnabled(false);
-								rootView.findViewById(R.id.delete_recording)
-										.setEnabled(true);
-
-								isRecording = false;
-							}
-						} else {
-
-							Toast.makeText(
-									getActivity(),
-									getActivity().getResources().getString(
-											R.string.rec_fail_mkdir),
-									Toast.LENGTH_LONG).show();
-
-							isRecording = false;
-						}
+						recordSound();
 
 						return false;
 					}
@@ -316,6 +240,25 @@ public class RecordAudioFragment extends Fragment {
 
 						mySoundOuput = new MediaPlayer();
 
+						// play PCM sound
+						// Use a new tread as this can take a while
+						Thread thread = new Thread(new Runnable()
+						{
+							public void run() {
+								genTone();
+								handler.post(new Runnable()
+								{
+									public void run() {
+										playSound();
+									}
+								});
+							}
+						});
+
+	    				thread.start();
+
+	    				recordSound();
+
 						return false;
 					}
 				}
@@ -426,4 +369,124 @@ public class RecordAudioFragment extends Fragment {
 		}
 	};
 
+	// play PCM Sound
+
+	void genTone(){
+		// fill out the array
+		for (int i = 0; i < numSamples; ++i) {
+			sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTone));
+		}
+
+		// convert to 16 bit pcm sound array
+		// assumes the sample buffer is normalised.
+
+		int idx = 0;
+		for (double dVal : sample) {
+			short val = (short) (dVal * 32767);
+			generatedSnd[idx++] = (byte) (val & 0x00ff);
+			generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+		}
+	}
+
+	void playSound(){
+		AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+						8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+
+		AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
+		audioTrack.write(generatedSnd, 0, numSamples);
+		audioTrack.play();
+	}
+
+	void recordSound(){
+		Helper.getHelperInstance().makeHepticFeedback(
+								getActivity());
+
+			if (Helper.getHelperInstance().createRecordingFolder()) {
+
+				SimpleDateFormat dateFormat = new SimpleDateFormat(
+						"yyyyMMdd_HH_mm_ss");
+				String currentTimeStamp = dateFormat
+						.format(new Date());
+
+				currentOutFile = Helper.RECORDING_PATH
+						+ "/recording_" + currentTimeStamp + ".3gp";
+
+				myAudioRecorder = new MediaRecorder();
+				myAudioRecorder
+						.setAudioSource(MediaRecorder.AudioSource.MIC);
+				myAudioRecorder
+						.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP);
+				myAudioRecorder
+						.setAudioEncoder(MediaRecorder.OutputFormat.AMR_NB);
+				myAudioRecorder.setOutputFile(currentOutFile);
+
+				try {
+
+					myAudioRecorder.prepare();
+					myAudioRecorder.start();
+
+					Toast.makeText(
+							getActivity(),
+							getActivity().getResources().getString(
+									R.string.rec_start),
+							Toast.LENGTH_LONG).show();
+
+					rootView.findViewById(R.id.start_recording)
+							.setEnabled(false);
+					rootView.findViewById(R.id.stop_recording)
+							.setEnabled(true);
+					rootView.findViewById(R.id.delete_recording)
+							.setEnabled(false);
+
+					isRecording = true;
+
+					handler.post(updateVisualizer);
+				}
+
+				catch (IllegalStateException e) {
+					Toast.makeText(
+							getActivity(),
+							getActivity().getResources().getString(
+									R.string.rec_fail),
+							Toast.LENGTH_LONG).show();
+					e.printStackTrace();
+
+					rootView.findViewById(R.id.start_recording)
+							.setEnabled(true);
+					rootView.findViewById(R.id.stop_recording)
+							.setEnabled(false);
+					rootView.findViewById(R.id.delete_recording)
+							.setEnabled(true);
+
+					isRecording = false;
+				}
+
+				catch (IOException e) {
+					Toast.makeText(
+							getActivity(),
+							getActivity().getResources().getString(
+									R.string.rec_fail),
+							Toast.LENGTH_LONG).show();
+					e.printStackTrace();
+
+					rootView.findViewById(R.id.start_recording)
+							.setEnabled(true);
+					rootView.findViewById(R.id.stop_recording)
+							.setEnabled(false);
+					rootView.findViewById(R.id.delete_recording)
+							.setEnabled(true);
+
+					isRecording = false;
+				}
+			} else {
+
+				Toast.makeText(
+						getActivity(),
+						getActivity().getResources().getString(
+								R.string.rec_fail_mkdir),
+						Toast.LENGTH_LONG).show();
+
+				isRecording = false;
+			}
+	}
 }
