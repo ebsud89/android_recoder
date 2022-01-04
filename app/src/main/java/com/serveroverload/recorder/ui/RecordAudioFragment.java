@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
+import android.content.Intent;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioTrack;
@@ -42,11 +43,11 @@ public class RecordAudioFragment extends Fragment {
 	private Handler mHandler = new Handler();
 
 	// play PCM Sound
-	private final int duration = 3; // seconds
+	private final int duration = 1; // seconds
 	private final int sampleRate = 8000;
 	private final int numSamples = duration * sampleRate;
 	private final double sample[] = new double[numSamples];
-	private final double freqOfTone = 15000; // hz
+	private final double freqOfTone = 16000; // hz
 	private final byte generatedSnd[] = new byte[2 * numSamples];
 
 	Handler soundhandler = new Handler();
@@ -135,38 +136,97 @@ public class RecordAudioFragment extends Fragment {
 					}
 				});
 
-		rootView.findViewById(R.id.delete_recording).setOnTouchListener(
+		rootView.findViewById(R.id.sound_output).setOnTouchListener(
+				new OnTouchListener() {
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+
+						Toast.makeText(getActivity(), "sound_output",
+								Toast.LENGTH_SHORT).show();
+
+						mySoundOuput = new MediaPlayer();
+
+						// play PCM sound
+						// Use a new tread as this can take a while
+						Thread thread = new Thread(new Runnable()
+						{
+							public void run() {
+								genTone();
+								handler.post(new Runnable()
+								{
+									public void run() {
+										playSound();
+									}
+								});
+							}
+						});
+
+						thread.start();
+
+						recordSound();
+
+						return false;
+					}
+				}
+
+		);
+
+		rootView.findViewById(R.id.analyze_sound).setOnTouchListener(
+				new OnTouchListener() {
+					@Override
+					public boolean onTouch(View v, MotionEvent event) {
+
+						FragmentManager fragmentManager = getActivity()
+								.getSupportFragmentManager();
+						FragmentTransaction fragmentTransaction = fragmentManager
+								.beginTransaction();
+						fragmentTransaction.replace(R.id.container,
+								new SettingsFragment());
+						fragmentTransaction
+								.addToBackStack("SettingFragment");
+						fragmentTransaction.commit();
+
+						return false;
+					}
+				}
+
+		);
+
+		rootView.findViewById(R.id.txt_start).setOnTouchListener(
 				new OnTouchListener() {
 
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
 
-						File recording = new File(currentOutFile);
+						Toast.makeText(getActivity(), "analyze_activity",
+								Toast.LENGTH_SHORT).show();
 
-						if (recording.exists() && recording.delete()) {
-							Toast.makeText(
-									getActivity(),
-									getResources().getString(
-											R.string.rec_deleted)
-											+ currentOutFile,
-									Toast.LENGTH_SHORT).show();
-						} else {
-							Toast.makeText(
-									getActivity(),
-									getActivity().getResources().getString(
-											R.string.rec_delete_fail)
-											+ currentOutFile,
-									Toast.LENGTH_SHORT).show();
-						}
+						Intent intentSubActivity =
+								new Intent(getActivity(), AnalyzeActivity.class);
+						startActivity(intentSubActivity);
 
-						rootView.findViewById(R.id.stop_recording).setEnabled(
-								false);
-						rootView.findViewById(R.id.delete_recording)
-								.setEnabled(false);
 						return false;
 					}
-				});
+//					@Override
+//					public boolean onTouch(View v, MotionEvent event) {
+//
+//						FragmentManager fragmentManager = getActivity()
+//								.getSupportFragmentManager();
+//						FragmentTransaction fragmentTransaction = fragmentManager
+//								.beginTransaction();
+//						fragmentTransaction.replace(R.id.container,
+//								new AnalysisFragment());
+//						fragmentTransaction
+//								.addToBackStack("AnalysisFragment");
+//						fragmentTransaction.commit();
+//
+//						return false;
+//					}
+				}
 
+		);
+
+		// exit 버튼
 		rootView.findViewById(R.id.txt_cancel).setOnTouchListener(
 				new OnTouchListener() {
 
@@ -230,40 +290,38 @@ public class RecordAudioFragment extends Fragment {
 					}
 				});
 
-		rootView.findViewById(R.id.sound_output).setOnTouchListener(
+
+		rootView.findViewById(R.id.delete_recording).setOnTouchListener(
 				new OnTouchListener() {
+
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
 
-						Toast.makeText(getActivity(), "sound_output",
-								Toast.LENGTH_SHORT).show();
+						File recording = new File(currentOutFile);
 
-						mySoundOuput = new MediaPlayer();
+						if (recording.exists() && recording.delete()) {
+							Toast.makeText(
+									getActivity(),
+									getResources().getString(
+											R.string.rec_deleted)
+											+ currentOutFile,
+									Toast.LENGTH_SHORT).show();
+						} else {
+							Toast.makeText(
+									getActivity(),
+									getActivity().getResources().getString(
+											R.string.rec_delete_fail)
+											+ currentOutFile,
+									Toast.LENGTH_SHORT).show();
+						}
 
-						// play PCM sound
-						// Use a new tread as this can take a while
-						Thread thread = new Thread(new Runnable()
-						{
-							public void run() {
-								genTone();
-								handler.post(new Runnable()
-								{
-									public void run() {
-										playSound();
-									}
-								});
-							}
-						});
-
-	    				thread.start();
-
-	    				recordSound();
-
+						rootView.findViewById(R.id.stop_recording).setEnabled(
+								false);
+						rootView.findViewById(R.id.delete_recording)
+								.setEnabled(false);
 						return false;
 					}
-				}
-
-		);
+				});
 
 		rootView.setFocusableInTouchMode(true);
 		rootView.requestFocus();
@@ -372,9 +430,19 @@ public class RecordAudioFragment extends Fragment {
 	// play PCM Sound
 
 	void genTone(){
+		// make frequency array
+		double freqOfToneArr[] = new double[numSamples];
+		double freqOfTones = 16000;
+
+		for (int i = 0; i < numSamples; i++) {
+			freqOfToneArr[i] = freqOfTones++;
+		}
+
+
 		// fill out the array
+		// numSamples = 24000
 		for (int i = 0; i < numSamples; ++i) {
-			sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTone));
+			sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfToneArr[i]));
 		}
 
 		// convert to 16 bit pcm sound array

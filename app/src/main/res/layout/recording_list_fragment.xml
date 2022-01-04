@@ -15,7 +15,7 @@
         android:layout_marginBottom="10dp"
         android:gravity="center_horizontal"
         android:padding="5dp"
-        android:text="Recording List"
+        android:text="Recorded File"
         android:textColor="@color/white"
         android:textSize="25sp"
         android:textStyle="bold" />
@@ -26,7 +26,7 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/txt_rec_title"
         android:layout_margin="5dp"
-        android:text="  Swipe list item to right for hidden menu, tap on item to play audio."
+        android:text="swipe list item to right for remove file\n"
         android:textColor="@android:color/white"
         android:textSize="20sp" />
 

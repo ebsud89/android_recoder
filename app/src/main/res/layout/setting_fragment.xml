@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:ripple="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dialog_root"
+    android:layout_width="fill_parent"
+    android:layout_height="match_parent"
+    android:layout_gravity="center_horizontal"
+    android:background="@android:color/white"
+    android:gravity="center_horizontal"
+    android:orientation="vertical" >
+
+    <LinearLayout
+        android:id="@+id/start_section"
+        android:layout_width="match_parent"
+        android:layout_height="92dp"
+        android:layout_marginTop="64dp"
+        android:orientation="horizontal" >
+
+        <EditText
+            android:id="@+id/start_frequency"
+            android:layout_width="186dp"
+            android:layout_height="54dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/edittext_border"
+            android:hint="Enter 'start freq.'"
+            android:inputType="phone" />
+
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="54dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginLeft="20dp"
+            android:id="@+id/start_button"
+            android:text="load current\nStart Frequency" />
+
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/end_section"
+        android:layout_width="match_parent"
+        android:layout_height="92dp"
+        android:layout_below="@id/start_section"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/end_frequency"
+            android:layout_width="186dp"
+            android:layout_height="54dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginRight="4dp"
+            android:layout_marginBottom="4dp"
+            android:background="@drawable/edittext_border"
+            android:hint="Enter 'end freq.'"
+            android:inputType="phone" />
+
+        <Button
+            android:id="@+id/end_button"
+            android:layout_width="148dp"
+            android:layout_height="54dp"
+            android:layout_marginLeft="20dp"
+            android:layout_marginTop="6dp"
+            android:text="load current End Frequency" />
+
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/txt_save"
+        android:layout_width="240dp"
+        android:layout_height="54dp"
+        android:layout_below="@+id/end_section"
+        android:layout_gravity="center"
+        android:layout_marginTop="22dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="96dp"
+        android:gravity="center_horizontal"
+        android:text="@string/rec_save"
+        android:textColor="@android:color/black"
+        />
+
+    <Button
+        android:id="@+id/txt_cancel"
+        android:layout_width="240dp"
+        android:layout_height="54dp"
+        android:layout_below="@+id/txt_save"
+        android:layout_gravity="center"
+        android:layout_marginTop="22dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginLeft="96dp"
+        android:gravity="center_horizontal"
+        android:text="@string/rec_cancel"
+        android:textColor="@android:color/black"
+        />
+
+
+</RelativeLayout>

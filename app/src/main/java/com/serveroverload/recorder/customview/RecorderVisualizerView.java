@@ -12,7 +12,7 @@ import android.view.View;
 
 public class RecorderVisualizerView extends View {
     private static final int LINE_WIDTH = 2; // width of visualizer lines
-    private static final int LINE_SCALE = 100; // scales visualizer lines
+    private static final int LINE_SCALE = 50; // scales visualizer lines
     private List<Float> amplitudes; // amplitudes for line lengths
     private int width; // width of this View
     private int height; // height of this View

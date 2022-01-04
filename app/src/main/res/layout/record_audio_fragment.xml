@@ -37,19 +37,26 @@
         android:textColor="@android:color/white"
         android:textSize="15sp" />
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/white"
+        android:paddingBottom="5dp"
+        android:paddingTop="5dp" />
+
     <LinearLayout
         android:id="@+id/recording_actions"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="54dp"
         android:layout_below="@+id/txt_alert_information"
         android:gravity="center_vertical" >
 
         <ImageView
             android:id="@+id/start_recording"
-            android:layout_width="44dp"
-            android:layout_height="50dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/ico_mic" />
+            android:src="@drawable/outline_volume_up_white_36" />
 
         <View
             android:layout_width="1dp"
@@ -63,7 +70,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/ic_action_stop" />
+            android:src="@drawable/outline_volume_off_white_36" />
 
         <View
             android:layout_width="1dp"
@@ -73,11 +80,26 @@
             android:paddingTop="5dp" />
 
         <ImageView
-            android:id="@+id/delete_recording"
+            android:id="@+id/sound_output"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_weight="1"
+            android:paddingTop="5dp"
+            android:src="@drawable/outline_sensors_white_36" />
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:background="@color/white"
+            android:paddingTop="5dp"
+            android:paddingBottom="5dp" />
+
+        <ImageView
+            android:id="@+id/analyze_sound"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/delete" />
+            android:src="@drawable/baseline_insights_white_36" />
 
         <View
             android:layout_width="1dp"
@@ -91,7 +113,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:src="@drawable/sort_list" />
+            android:src="@drawable/outline_list_white_36" />
 
         <View
             android:id="@+id/view"
@@ -103,19 +125,32 @@
             android:paddingBottom="5dp" />
 
         <ImageView
-            android:id="@+id/sound_output"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+            android:id="@+id/delete_recording"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:paddingTop="5dp"
-            android:src="@drawable/speaker" />
+            android:src="@drawable/baseline_delete_outline_white_36" />
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/txt_start"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/recording_actions"
+        android:layout_gravity="center"
+        android:layout_margin="10dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginTop="10dp"
+        android:gravity="center_horizontal"
+        android:text="@string/rec_analyze"
+        android:textColor="@android:color/white"
+        android:textSize="20sp" />
 
     <TextView
         android:id="@+id/txt_cancel"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/recording_actions"
+        android:layout_below="@+id/txt_start"
         android:layout_gravity="center"
         android:layout_margin="10dp"
         android:layout_marginBottom="10dp"
