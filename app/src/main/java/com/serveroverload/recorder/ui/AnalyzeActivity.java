@@ -42,6 +42,7 @@ import com.github.mikephil.charting.data.BarEntry;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import com.serveroverload.recorder.R;
+import com.serveroverload.recorder.util.PreferenceManager;
 
 public class AnalyzeActivity extends Activity implements OnClickListener {
 
@@ -50,7 +51,8 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
     private RealDoubleFFT transformer;
-    int blockSize = 4096; // 2048->1024개의 배열이 나옴. 배열 한 칸당 4hz의 범위를 포함하고 있음. //4096->배열 2048이고 한칸당 2hz //배열 번호 1씩 증가-> hz는 2씩 증가한다.
+    int test_modifier = 1;
+    int blockSize = 4096 * test_modifier; // 2048->1024개의 배열이 나옴. 배열 한 칸당 4hz의 범위를 포함하고 있음. //4096->배열 2048이고 한칸당 2hz //배열 번호 1씩 증가-> hz는 2씩 증가한다.
     //배열이 40일때 hz는 80헤르츠를 가지고있다는것.
     DoubleFFT_1D fft = new DoubleFFT_1D(blockSize); //JTransform 라이브러리로 FFT 수행
 
@@ -58,8 +60,10 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     //frequency -> 측정 주파수 대역으로 퓨리에 변환 시 f/2 만큼의 크기의 주파수를 분석 할 수 있음.
     //blockSize -> 한 분기마다 측정하는 사이즈로 double 배열로 저장 시 , b/2 개의 배열이 나옴. f/b -> 배열 하나에 할당되는 주파수 범위로 8192/2048 -> 4Hz임
 
-    Button startStopButton;
+    Button analyzeButton;
     Button chirpButton;
+    TextView analyzeText;
+    TextView chirpText;
 
     boolean started = false;
     boolean chirping = false;
@@ -71,14 +75,19 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     // 이 레벨들을 그리려면 Bitmap에서 구성한 Canvas 객체와 Paint객체가 필요하다.
     private static final String TAG = AnalyzeActivity.class.getSimpleName();
 
-    // play PCM Sound
+    // play PCM Sound (genTone)
     private final int duration = 1; // seconds
     private final int sampleRate = 8000;
     private final int numSamples = duration * sampleRate;
     private final double sample[] = new double[numSamples];
     private final double freqOfTone = 16000; // hz
     private final byte generatedSnd[] = new byte[2 * numSamples];
+    private double START_FREQ = 8000;
+    private double END_FREQ = 12000;
 
+    // play PCM sound (makeTone)
+    private final int sample_size = numSamples;
+    private final byte pcm[] = new byte[2 * sample_size];
 
     ImageView imageView;
     Bitmap bitmap;
@@ -107,11 +116,15 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
         setContentView(R.layout.activity_analyze);
 
-        startStopButton = (Button) findViewById(R.id.StartStopButton);
-        startStopButton.setOnClickListener(this);
+        analyzeButton = (Button) findViewById(R.id.AnalyzeButton);
+        analyzeButton.setOnClickListener(this);
+
+        analyzeText = (TextView) findViewById(R.id.AnalyzeText);
 
         chirpButton = (Button) findViewById(R.id.ChirpButton);
         chirpButton.setOnClickListener(this);
+
+        chirpText = (TextView) findViewById(R.id.ChirpText);
 
         // RealDoubleFFT 클래스 컨스트럭터는 한번에 처리할 샘플들의 수를 받는다. 그리고 출력될 주파수 범위들의 수를 나타낸다.
         transformer = new RealDoubleFFT(blockSize);
@@ -149,13 +162,14 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         }
 
         //초기 데이터
-        ylabels.add(new BarEntry(2.2f,0));
-        ylabels.add(new BarEntry(10f,512));
-        ylabels.add(new BarEntry(63.f,800));
-        ylabels.add(new BarEntry(70.f,900));
+//        ylabels.add(new BarEntry(2.2f,0));
+//        ylabels.add(new BarEntry(10f,512));
+//        ylabels.add(new BarEntry(63.f,800));
+//        ylabels.add(new BarEntry(70.f,900));
 
         BarDataSet barDataSet = new BarDataSet(ylabels,"Hz");
-        barDataSet.setColor(Color.BLUE);
+        barDataSet.setColor(Color.YELLOW);
+        barDataSet.setDrawValues(false);
         //  chart.animateY(5000);
         data = new BarData(xlabels,barDataSet); //MPAndroidChart v3.1 에서 오류나서 다른 버전 사용
         // barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
@@ -164,8 +178,20 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         chart.setDescription("");
 
         // support scrollview - viewport
-        chart.setVisibleXRangeMaximum(1000);
-        chart.moveViewToX(5);
+        chart.setVisibleXRangeMaximum(2000);
+        chart.moveViewToX(8);
+        chart.getXAxis().setTextColor(Color.WHITE);
+        chart.getXAxis().setGridColor(Color.WHITE);
+        chart.getAxisLeft().setTextColor(Color.WHITE);
+        chart.getAxisLeft().setGridColor(Color.WHITE);
+        chart.setBorderColor(Color.WHITE);
+
+        // Chirp freqeuncy
+        START_FREQ = (double) PreferenceManager.getInt(this, "start_freq");
+        END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
+
+        Toast.makeText(this, Double.toString(START_FREQ) + " / " +Double.toString(END_FREQ),
+                Toast.LENGTH_SHORT).show();
 
 
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
@@ -263,18 +289,18 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
             for(int i=0; i<chart_max_xrange; i++){
 
-                if (i < 1024) {
+//                if (i < 1024) {
                     xlabels.add(Integer.toString(xChart));
                     xChart = xChart + 1;
-                }
+//                }
             }
 
             for(int i=43; i<chart_max_xrange; i++){
                 if (i < 1024) {
-                    if (toTransform[0][i] > 0) {
+//                    if (toTransform[0][i] > 0) {
                         ylabels.add(new BarEntry((float) toTransform[0][i], i));
                         //ylabels.add(new BarEntry((float)i,i));
-                    }
+//                    }
                 }
             }
 
@@ -308,7 +334,12 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
             //차트 없애는 부분 여기
             BarDataSet barDataSet = new BarDataSet(ylabels,"Hz");
+            barDataSet.setColor(Color.YELLOW);
+            barDataSet.setDrawValues(false);
             data = new BarData(xlabels,barDataSet);
+
+            chart.setVisibleXRangeMaximum(2000);
+            chart.moveViewToX(8);
 
             chart.setData(data);
             chart.invalidate();
@@ -420,6 +451,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                         }
                     });
 
+                    Log.d("RUNNABLE", "repeat chrip");
                 }
 
             } catch (Throwable t) {
@@ -433,21 +465,24 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     public void onClick(View arg0) {
 
 
-        if(arg0.getId() == R.id.StartStopButton) {
+        if(arg0.getId() == R.id.AnalyzeButton) {
 
             if (started) {
                 Toast.makeText(this.getApplicationContext(), "stop analyzing",
                     Toast.LENGTH_SHORT).show();
                 started = false;
-                startStopButton.setText("Start");
+                analyzeText.setText("OFF");
+                analyzeText.setTextColor(Color.parseColor("#DA334D"));
                 recordTask.cancel(true);
             } else {
                 Toast.makeText(this.getApplicationContext(), "start analyzing",
                     Toast.LENGTH_SHORT).show();
                 started = true;
-                startStopButton.setText("Stop");
+                analyzeText.setText("ON");
+                analyzeText.setTextColor(Color.parseColor("#33DA6D"));
                 recordTask = new RecordAudio();
-                recordTask.execute();
+//                recordTask.execute();
+                recordTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
         else if (arg0.getId() == R.id.ChirpButton) {
@@ -457,13 +492,16 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
             if (chirping) {
                 chirping = false;
-                //startStopButton.setText("Start");
+                chirpText.setText("OFF");
+                chirpText.setTextColor(Color.parseColor("#DA334D"));
                 playTask.cancel(true);
             } else {
                 chirping = true;
-                //startStopButton.setText("Stop");
+                chirpText.setText("ON");
+                chirpText.setTextColor(Color.parseColor("#33DA6D"));
                 playTask = new PlayAudio();
-                playTask.execute();
+//                playTask.execute();
+                playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         }
     }
@@ -474,7 +512,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
         // make frequency array
         double[] freqOfToneArr = new double[numSamples];
-        double freqOfTones = 16000;
+        double freqOfTones = START_FREQ;
 
         for (int i = 0; i < numSamples; i++) {
             freqOfToneArr[i] = freqOfTones++;
@@ -494,6 +532,20 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             short val = (short) (dVal * 32767);
             generatedSnd[idx++] = (byte) (val & 0x00ff);
             generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+        }
+    }
+
+    public void makeTone() {
+        int pcm_i = 0;
+        double sigma = 0.8;
+        double freqHz = START_FREQ;
+        if(pcm ==null || sample_size <= 0) return;
+        // make signal
+        for(int i = 0; i<sample_size;i++) {
+            double s = (i - (sample_size - 1) / 2) / (sigma*(sample_size - 1) / 2);
+            short val = (short) (Math.sin(freqHz * 2 * Math.PI * i / sampleRate)*Math.exp(-(s*s)/ 2) * 32767);
+            pcm[pcm_i++] = (byte) (val & 0xff);
+            pcm[pcm_i++] = (byte) ((val & 0xff00) >> 8);
         }
     }
 

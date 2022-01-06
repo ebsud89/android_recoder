@@ -198,9 +198,6 @@ public class RecordAudioFragment extends Fragment {
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
 
-						Toast.makeText(getActivity(), "analyze_activity",
-								Toast.LENGTH_SHORT).show();
-
 						Intent intentSubActivity =
 								new Intent(getActivity(), AnalyzeActivity.class);
 						startActivity(intentSubActivity);

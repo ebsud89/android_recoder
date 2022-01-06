@@ -13,4 +13,7 @@
     <color name="bg_gradient_end">#00008c</color>
     <color name="default_background">#6495ed</color>
 
+    <color name="text_green">#33DA6D</color>
+    <color name="text_red">#DA334D</color>
+
 </resources>

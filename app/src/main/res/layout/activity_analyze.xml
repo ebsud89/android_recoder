@@ -6,6 +6,7 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:layout_marginTop="10dp"
+    android:background="@drawable/bg_gradient"
     >
 
     <LinearLayout
@@ -15,11 +16,22 @@
         android:orientation="horizontal">
 
         <Button
-            android:id="@+id/StartStopButton"
+            android:id="@+id/AnalyzeButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginRight="10dp"
-            android:text="Start" />
+            android:text="Analyze" />
+
+        <TextView
+            android:id="@+id/AnalyzeText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="10dp"
+            android:textColor="@color/text_red"
+            android:textStyle="bold"
+            android:text="OFF" />
 
         <Button
             android:id="@+id/ChirpButton"
@@ -27,6 +39,16 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="20dp"
             android:text="Chirp" />
+
+        <TextView
+            android:id="@+id/ChirpText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="8dp"
+            android:textColor="@color/text_red"
+            android:textStyle="bold"
+            android:text="OFF" />
 
 
     </LinearLayout>
@@ -37,6 +59,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginLeft="20dp"
+        android:textColor="@color/white"
         android:text=" Detect Frequency (using FFT in Jtransform)" />
 
 
@@ -76,15 +99,17 @@
                 android:id="@+id/textView0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="대역 대"
+                android:text="Max Freq."
+                android:textColor="@color/white"
                 android:layout_marginLeft="10dp"/>
 
             <TextView
                 android:id="@+id/textView1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="크기"
-                android:layout_marginLeft="20dp"/>
+                android:text="Vol. size"
+                android:textColor="@color/white"
+                android:layout_marginLeft="40dp"/>
 
             <!--<TextView
                 android:id="@+id/textView2"
@@ -111,15 +136,17 @@
                 android:id="@+id/HzText0"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="1s"
+                android:text="..."
+                android:textColor="@color/white"
                 android:layout_marginLeft="10dp"/>
 
             <TextView
                 android:id="@+id/HzText1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="2s "
-                android:layout_marginLeft="10dp"/>
+                android:text="..."
+                android:textColor="@color/white"
+                android:layout_marginLeft="40dp"/>
 
             <!--<TextView
                 android:id="@+id/HzText2"
@@ -144,7 +171,7 @@
         android:layout_width="match_parent"
         android:layout_height="280dp"
         android:layout_below="@+id/table_layout"
-        android:layout_marginTop="10dp"
+        android:layout_marginTop="18dp"
         android:layout_marginBottom="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginLeft="4dp"
@@ -154,8 +181,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
-            android:layout_marginLeft="8dp"
-            android:text="W.I.P"
+            android:layout_marginLeft="12dp"
+            android:text="W.I.P (Detected Freq. View)"
             android:textSize="20dp"
             android:textColor="@color/white"/>
 

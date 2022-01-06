@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.serveroverload.recorder.R;
+import com.serveroverload.recorder.util.PreferenceManager;
 
 public class HomeActivity extends FragmentActivity {
 
@@ -31,6 +32,10 @@ public class HomeActivity extends FragmentActivity {
 		setContentView(R.layout.activity_main);
 
 		mMediaPlayer = new MediaPlayer();
+
+		// sharedPreference
+		PreferenceManager.setInt(this, "start_freq", 12000);
+		PreferenceManager.setInt(this, "end_freq", 16000);
 
 		androidx.fragment.app.FragmentManager fragmentManager= getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
