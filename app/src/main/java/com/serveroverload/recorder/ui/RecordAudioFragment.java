@@ -171,7 +171,7 @@ public class RecordAudioFragment extends Fragment {
 
 		);
 
-		rootView.findViewById(R.id.analyze_sound).setOnTouchListener(
+		rootView.findViewById(R.id.setting_frequency).setOnTouchListener(
 				new OnTouchListener() {
 					@Override
 					public boolean onTouch(View v, MotionEvent event) {
@@ -192,7 +192,7 @@ public class RecordAudioFragment extends Fragment {
 
 		);
 
-		rootView.findViewById(R.id.txt_start).setOnTouchListener(
+		rootView.findViewById(R.id.start_analytics).setOnTouchListener(
 				new OnTouchListener() {
 
 					@Override
@@ -227,7 +227,7 @@ public class RecordAudioFragment extends Fragment {
 		);
 
 		// exit 버튼
-		rootView.findViewById(R.id.txt_cancel).setOnTouchListener(
+		rootView.findViewById(R.id.exit_app).setOnTouchListener(
 				new OnTouchListener() {
 
 					@Override

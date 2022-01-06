@@ -5,34 +5,40 @@
     android:orientation="vertical"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
+    android:layout_marginTop="10dp"
     >
 
     <LinearLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginLeft="10dp"
         android:orientation="horizontal">
 
         <Button
             android:id="@+id/StartStopButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
             android:text="Start" />
 
         <Button
             android:id="@+id/ChirpButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="10dp"
+            android:layout_marginLeft="20dp"
             android:text="Chirp" />
 
-        <TextView
-
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:text=" Detect Frequency (using FFT in Jtransform)" />
 
     </LinearLayout>
+
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="20dp"
+        android:text=" Detect Frequency (using FFT in Jtransform)" />
+
 
 
     <!--<ImageView
@@ -50,13 +56,17 @@
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="280dp">
+        android:layout_height="340dp"
+        android:layout_marginTop="32dp">
 
     </com.github.mikephil.charting.charts.BarChart>
 
     <TableLayout
+        android:id="@+id/table_layout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginLeft="4dp">
 
         <TableRow
             android:layout_width="match_parent"
@@ -74,7 +84,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="크기"
-                android:layout_marginLeft="10dp"/>
+                android:layout_marginLeft="20dp"/>
 
             <!--<TextView
                 android:id="@+id/textView2"
@@ -129,6 +139,27 @@
         </TableRow>
 
     </TableLayout>
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="280dp"
+        android:layout_below="@+id/table_layout"
+        android:layout_marginTop="10dp"
+        android:layout_marginBottom="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_marginLeft="4dp"
+        android:background="@android:color/background_dark" >
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="8dp"
+            android:text="W.I.P"
+            android:textSize="20dp"
+            android:textColor="@color/white"/>
+
+    </FrameLayout>
 
 
 </LinearLayout>

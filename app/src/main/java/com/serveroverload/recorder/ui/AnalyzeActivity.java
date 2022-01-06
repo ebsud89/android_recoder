@@ -9,11 +9,14 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.AudioFormat;
+import android.media.AudioManager;
 import android.media.AudioRecord;
+import android.media.AudioTrack;
 import android.media.MediaRecorder;
 import android.media.audiofx.NoiseSuppressor;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -28,6 +31,7 @@ import java.util.Iterator;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
 import android.media.audiofx.NoiseSuppressor;
+import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -58,11 +62,22 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     Button chirpButton;
 
     boolean started = false;
+    boolean chirping = false;
     // RecordAudio는 여기에서 정의되는 내부 클래스로서 AsyncTask를 확장한다.
     RecordAudio recordTask;
+    // PlayAudio는 여기에서 정의되는 내부 클래스로서 AsyncTask를 확장한다.
+    PlayAudio playTask;
     // Bitmap 이미지를 표시하기 위해 ImageView를 사용한다. 이 이미지는 현재 오디오 스트림에서 주파수들의 레벨을 나타낸다.
     // 이 레벨들을 그리려면 Bitmap에서 구성한 Canvas 객체와 Paint객체가 필요하다.
     private static final String TAG = AnalyzeActivity.class.getSimpleName();
+
+    // play PCM Sound
+    private final int duration = 1; // seconds
+    private final int sampleRate = 8000;
+    private final int numSamples = duration * sampleRate;
+    private final double sample[] = new double[numSamples];
+    private final double freqOfTone = 16000; // hz
+    private final byte generatedSnd[] = new byte[2 * numSamples];
 
 
     ImageView imageView;
@@ -71,6 +86,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     Paint paint;
 
     BarChart chart;
+    int chart_max_xrange = 20000;
     ArrayList xlabels = new ArrayList();
     ArrayList ylabels = new ArrayList();
     BarData data;
@@ -87,7 +103,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         setContentView(R.layout.activity_analyze);
 
@@ -117,7 +133,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         YAxis leftYAxis = chart.getAxisLeft();
         XAxis xAxis = chart.getXAxis();
         xAxis.setAxisMinValue(0);
-        xAxis.setAxisMaxValue((float)1024);
+        xAxis.setAxisMaxValue((float)20000); // 기존 1024
         leftYAxis.setAxisMaxValue((float)200);
         leftYAxis.setAxisMinValue(0);
         chart.getAxisRight().setEnabled(false);
@@ -126,7 +142,8 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         int xChart=0;
         //x축 라벨 추가
         //4096 / 16 =256 씩 16칸으로 할거임
-        for(int i=0; i<1024; i++){
+        //for(int i=0; i<1024; i++){
+        for(int i=0; i<chart_max_xrange; i++){
             xlabels.add(Integer.toString(xChart));
             xChart=xChart+1;
         }
@@ -138,11 +155,18 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         ylabels.add(new BarEntry(70.f,900));
 
         BarDataSet barDataSet = new BarDataSet(ylabels,"Hz");
+        barDataSet.setColor(Color.BLUE);
         //  chart.animateY(5000);
         data = new BarData(xlabels,barDataSet); //MPAndroidChart v3.1 에서 오류나서 다른 버전 사용
         // barDataSet.setColors(ColorTemplate.COLORFUL_COLORS);
 
         chart.setData(data);
+        chart.setDescription("");
+
+        // support scrollview - viewport
+        chart.setVisibleXRangeMaximum(1000);
+        chart.moveViewToX(5);
+
 
         if (ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED
                 || ActivityCompat.checkSelfPermission(getApplicationContext(), Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
@@ -237,16 +261,20 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
             int xChart=0;
 
-            for(int i=0; i<1024; i++){
+            for(int i=0; i<chart_max_xrange; i++){
 
-                xlabels.add(Integer.toString(xChart));
-                xChart=xChart+1;
+                if (i < 1024) {
+                    xlabels.add(Integer.toString(xChart));
+                    xChart = xChart + 1;
+                }
             }
 
-            for(int i=43; i<1024; i++){
-                if(toTransform[0][i]>0){
-                    ylabels.add(new BarEntry((float)toTransform[0][i],i));
-                    //ylabels.add(new BarEntry((float)i,i));
+            for(int i=43; i<chart_max_xrange; i++){
+                if (i < 1024) {
+                    if (toTransform[0][i] > 0) {
+                        ylabels.add(new BarEntry((float) toTransform[0][i], i));
+                        //ylabels.add(new BarEntry((float)i,i));
+                    }
                 }
             }
 
@@ -374,28 +402,108 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         return scale2;
     }
 
-    private class PlayAudio extends AsyncTask<Void, double[], Void> {
-
+    private class PlayAudio extends AsyncTask<Void, Void, Void> {
 
         @Override
         protected Void doInBackground(Void... voids) {
+
+            try {
+                genTone();
+                while(!isCancelled()) {
+                    int value = 1;
+                    Thread.sleep(5000);
+                    Handler toast_handler = new Handler(getMainLooper());
+                    toast_handler.post(new Runnable() {
+                        @Override
+                        public void run() { Toast.makeText(getApplicationContext(), "PlayAudio",
+                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+
+                }
+
+            } catch (Throwable t) {
+                Log.e("PlayAudio", "PlayAudio Failed");
+            }
             return null;
         }
     }
 
     @Override
     public void onClick(View arg0) {
-        if (started) {
-            started = false;
-            startStopButton.setText("Start");
-            recordTask.cancel(true);
-        } else {
-            started = true;
-            startStopButton.setText("Stop");
-            recordTask = new RecordAudio();
-            recordTask.execute();
+
+
+        if(arg0.getId() == R.id.StartStopButton) {
+
+            if (started) {
+                Toast.makeText(this.getApplicationContext(), "stop analyzing",
+                    Toast.LENGTH_SHORT).show();
+                started = false;
+                startStopButton.setText("Start");
+                recordTask.cancel(true);
+            } else {
+                Toast.makeText(this.getApplicationContext(), "start analyzing",
+                    Toast.LENGTH_SHORT).show();
+                started = true;
+                startStopButton.setText("Stop");
+                recordTask = new RecordAudio();
+                recordTask.execute();
+            }
+        }
+        else if (arg0.getId() == R.id.ChirpButton) {
+
+            Toast.makeText(this.getApplicationContext(), "chrip_button",
+                    Toast.LENGTH_SHORT).show();
+
+            if (chirping) {
+                chirping = false;
+                //startStopButton.setText("Start");
+                playTask.cancel(true);
+            } else {
+                chirping = true;
+                //startStopButton.setText("Stop");
+                playTask = new PlayAudio();
+                playTask.execute();
+            }
         }
     }
 
+    public void genTone(){
+        // numSamples = duration * sampleRate;
+        // numSamples = 8000
+
+        // make frequency array
+        double[] freqOfToneArr = new double[numSamples];
+        double freqOfTones = 16000;
+
+        for (int i = 0; i < numSamples; i++) {
+            freqOfToneArr[i] = freqOfTones++;
+        }
+
+
+        // fill out the array
+        for (int i = 0; i < numSamples; ++i) {
+            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate) * freqOfToneArr[i]);
+        }
+
+        // convert to 16 bit pcm sound array
+        // assumes the sample buffer is normalised.
+
+        int idx = 0;
+        for (double dVal : sample) {
+            short val = (short) (dVal * 32767);
+            generatedSnd[idx++] = (byte) (val & 0x00ff);
+            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
+        }
+    }
+
+    public void playSound(){
+        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+                8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+
+                AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
+        audioTrack.write(generatedSnd, 0, numSamples);
+        audioTrack.play();
+    }
 
 }  //activity
