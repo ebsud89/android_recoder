@@ -46,12 +46,13 @@ import com.serveroverload.recorder.util.PreferenceManager;
 
 public class AnalyzeActivity extends Activity implements OnClickListener {
 
-    int frequency = 8192; //주파수가 8192일 경우 4096 까지 측정이 가능함
+    int test_modifier = 8;
+
+    int frequency = 8192 * test_modifier; //주파수가 8192일 경우 4096 까지 측정이 가능함
     int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
     int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
     private RealDoubleFFT transformer;
-    int test_modifier = 1;
     int blockSize = 4096 * test_modifier; // 2048->1024개의 배열이 나옴. 배열 한 칸당 4hz의 범위를 포함하고 있음. //4096->배열 2048이고 한칸당 2hz //배열 번호 1씩 증가-> hz는 2씩 증가한다.
     //배열이 40일때 hz는 80헤르츠를 가지고있다는것.
     DoubleFFT_1D fft = new DoubleFFT_1D(blockSize); //JTransform 라이브러리로 FFT 수행
@@ -186,6 +187,12 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         chart.getAxisLeft().setGridColor(Color.WHITE);
         chart.setBorderColor(Color.WHITE);
 
+        // change MP chart ViewPort
+//        chart.moveViewToX(4048);
+        chart.centerViewTo(5059,0, YAxis.AxisDependency.LEFT);
+        chart.setScaleMinima(0f,1.5f);
+
+
         // Chirp freqeuncy
         START_FREQ = (double) PreferenceManager.getInt(this, "start_freq");
         END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
@@ -296,11 +303,11 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             }
 
             for(int i=43; i<chart_max_xrange; i++){
-                if (i < 1024) {
-//                    if (toTransform[0][i] > 0) {
+                if (i < blockSize) {
+                    if (toTransform[0][i] > 0) {
                         ylabels.add(new BarEntry((float) toTransform[0][i], i));
                         //ylabels.add(new BarEntry((float)i,i));
-//                    }
+                    }
                 }
             }
 
