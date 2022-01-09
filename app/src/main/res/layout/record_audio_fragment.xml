@@ -14,6 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
+        android:layout_marginTop="24dp"
         android:layout_gravity="center_horizontal"
         android:gravity="center_horizontal"
         android:padding="5dp"
@@ -29,26 +30,28 @@
         android:layout_below="@+id/txt_rec_title"
         android:layout_gravity="center"
         android:layout_marginStart="10sp"
-        android:layout_marginTop="10sp"
+        android:layout_marginTop="24dp"
         android:layout_marginEnd="10sp"
-        android:layout_marginBottom="10sp"
+        android:layout_marginBottom="14dp"
         android:gravity="center_horizontal"
         android:text="@string/rec_info"
         android:textColor="@android:color/white"
         android:textSize="15sp" />
 
     <View
+        android:id="@+id/horizontal_bar_1"
         android:layout_width="match_parent"
         android:layout_height="1dp"
+        android:layout_below="@id/txt_alert_information"
         android:background="@color/white"
-        android:paddingBottom="5dp"
-        android:paddingTop="5dp" />
+        android:layout_marginTop="5dp"
+        android:layout_marginBottom="5dp" />
 
     <LinearLayout
         android:id="@+id/recording_actions_bar1"
         android:layout_width="match_parent"
-        android:layout_height="54dp"
-        android:layout_below="@+id/txt_alert_information"
+        android:layout_height="64dp"
+        android:layout_below="@+id/horizontal_bar_1"
         android:gravity="center_vertical" >
 
         <ImageView
@@ -61,9 +64,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp" />
+            android:background="@color/white"/>
 
         <ImageView
             android:id="@+id/stop_recording"
@@ -75,14 +76,12 @@
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp" />
+            android:background="@color/white"/>
 
         <ImageView
             android:id="@+id/sound_output"
-            android:layout_width="44dp"
-            android:layout_height="44dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:layout_weight="1"
             android:paddingTop="5dp"
             android:src="@drawable/outline_sensors_white_36" />
@@ -90,9 +89,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp" />
+            android:background="@color/white"/>
 
         <ImageView
             android:id="@+id/setting_frequency"
@@ -102,10 +99,19 @@
             android:src="@drawable/baseline_tune_white_36" />
     </LinearLayout>
 
+    <View
+        android:id="@+id/horizontal_bar_2"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/recording_actions_bar1"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
+        android:background="@color/white"/>
+
     <LinearLayout
         android:id="@+id/recording_actions_bar2"
         android:layout_width="match_parent"
-        android:layout_height="54dp"
+        android:layout_height="64dp"
         android:layout_below="@id/recording_actions_bar1"
         android:layout_marginTop="10dp"
         android:gravity="center_vertical" >
@@ -120,9 +126,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp" />
+            android:background="@color/white"/>
 
         <ImageView
             android:id="@+id/browse_recording"
@@ -134,9 +138,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:paddingTop="5dp"
-            android:paddingBottom="5dp" />
+            android:background="@color/white"/>
 
         <ImageView
             android:id="@+id/delete_recording"
@@ -148,9 +150,7 @@
         <View
             android:layout_width="1dp"
             android:layout_height="match_parent"
-            android:background="@color/white"
-            android:paddingBottom="5dp"
-            android:paddingTop="5dp" />
+            android:background="@color/white"/>
 
         <ImageView
             android:id="@+id/exit_app"
@@ -160,12 +160,33 @@
             android:src="@drawable/baseline_logout_white_36" />
     </LinearLayout>
 
+    <View
+        android:id="@+id/horizontal_bar_3"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_below="@id/recording_actions_bar2"
+        android:layout_marginTop="4dp"
+        android:background="@color/white"/>
+
+    <TextView
+        android:id="@+id/txt_detect_view"
+        android:layout_below="@id/horizontal_bar_3"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="12dp"
+        android:gravity="center_horizontal"
+        android:text="@string/rec_analyze"
+        android:textColor="@android:color/white"
+        android:textSize="18sp" />
+
     <FrameLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/recording_actions_bar2"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="8dp"
+        android:layout_below="@+id/txt_detect_view"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp"
         android:padding="2dp"
         android:background="@android:color/white" >
 

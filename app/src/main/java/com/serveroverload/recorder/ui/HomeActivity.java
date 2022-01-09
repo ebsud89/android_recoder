@@ -34,8 +34,10 @@ public class HomeActivity extends FragmentActivity {
 		mMediaPlayer = new MediaPlayer();
 
 		// sharedPreference
+//		if (PreferenceManager.getInt(this, "start_freq") )
 		PreferenceManager.setInt(this, "start_freq", 12000);
 		PreferenceManager.setInt(this, "end_freq", 16000);
+		PreferenceManager.setInt(this, "duration_freq", 1);
 
 		androidx.fragment.app.FragmentManager fragmentManager= getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

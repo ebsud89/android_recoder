@@ -9,11 +9,18 @@
     <color name="white">#FFFFFFFF</color>
 
     <color name="opaque">#70000000</color>
-    <color name="bg_gradient_start">#1ea4ff</color>
-    <color name="bg_gradient_end">#00008c</color>
+    <color name="bg_gradient_start">#00233f</color>
+    <color name="bg_gradient_end">#144a6c</color>
     <color name="default_background">#6495ed</color>
 
     <color name="text_green">#33DA6D</color>
     <color name="text_red">#DA334D</color>
+
+    <!-- Color Preset : https://www.color-hex.com/color-palette/1006842 -->
+    <color name="color_blue_1">	#e1e5e8</color>
+    <color name="color_blue_2">	#2b89b0</color>
+    <color name="color_blue_3">	#144a6c</color>
+    <color name="color_blue_4">	#00233f</color>
+    <color name="color_blue_5">	#010e1b</color>
 
 </resources>

@@ -2,16 +2,21 @@ package com.serveroverload.recorder.ui;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.FragmentManager;
+import android.app.FragmentTransaction;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
+import static android.media.AudioTrack.*;
 import android.media.MediaRecorder;
 import android.media.audiofx.NoiseSuppressor;
 import android.os.AsyncTask;
@@ -27,6 +32,7 @@ import android.widget.TextView;
 import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
@@ -80,15 +86,18 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     private final int duration = 1; // seconds
     private final int sampleRate = 8000;
     private final int numSamples = duration * sampleRate;
-    private final double sample[] = new double[numSamples];
-    private final double freqOfTone = 16000; // hz
-    private final byte generatedSnd[] = new byte[2 * numSamples];
-    private double START_FREQ = 8000;
-    private double END_FREQ = 12000;
+    private double sample[] = null;
+    private final double freqOfTone = 6000; // hz
+    private byte[] generatedSnd = null;
+    private double START_FREQ = 0;
+    private double END_FREQ = 0;
+    private int DURATION_FREQ = 1;
 
     // play PCM sound (makeTone)
-    private final int sample_size = numSamples;
-    private final byte pcm[] = new byte[2 * sample_size];
+    private int sample_size = numSamples;
+    private final byte pcm[] = new byte[2 * numSamples];
+
+    private AudioTrack audioTrack = null;
 
     ImageView imageView;
     Bitmap bitmap;
@@ -110,12 +119,16 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     // scaleThread scThr = new scaleThread();
     double[] mag = new double[blockSize/2];
 
+    Context context;
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         //setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         setContentView(R.layout.activity_analyze);
+
+        context = this;
 
         analyzeButton = (Button) findViewById(R.id.AnalyzeButton);
         analyzeButton.setOnClickListener(this);
@@ -126,6 +139,14 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         chirpButton.setOnClickListener(this);
 
         chirpText = (TextView) findViewById(R.id.ChirpText);
+
+        // Chirp freqeuncy
+        START_FREQ = (double) PreferenceManager.getInt(this, "start_freq");
+        END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
+        DURATION_FREQ = PreferenceManager.getInt(this, "duration_freq");
+
+        sample = new double[numSamples * DURATION_FREQ];
+        generatedSnd = new byte[2 * numSamples * DURATION_FREQ];
 
         // RealDoubleFFT 클래스 컨스트럭터는 한번에 처리할 샘플들의 수를 받는다. 그리고 출력될 주파수 범위들의 수를 나타낸다.
         transformer = new RealDoubleFFT(blockSize);
@@ -179,7 +200,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         chart.setDescription("");
 
         // support scrollview - viewport
-        chart.setVisibleXRangeMaximum(2000);
+        chart.setVisibleXRangeMaximum(1600);
         chart.moveViewToX(8);
         chart.getXAxis().setTextColor(Color.WHITE);
         chart.getXAxis().setGridColor(Color.WHITE);
@@ -189,13 +210,9 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
         // change MP chart ViewPort
 //        chart.moveViewToX(4048);
-        chart.centerViewTo(5059,0, YAxis.AxisDependency.LEFT);
+        int center = (int) START_FREQ;
+        chart.centerViewTo(center,0, YAxis.AxisDependency.LEFT);
         chart.setScaleMinima(0f,1.5f);
-
-
-        // Chirp freqeuncy
-        START_FREQ = (double) PreferenceManager.getInt(this, "start_freq");
-        END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
 
         Toast.makeText(this, Double.toString(START_FREQ) + " / " +Double.toString(END_FREQ),
                 Toast.LENGTH_SHORT).show();
@@ -345,8 +362,12 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             barDataSet.setDrawValues(false);
             data = new BarData(xlabels,barDataSet);
 
-            chart.setVisibleXRangeMaximum(2000);
+            chart.setVisibleXRangeMaximum(6400);
             chart.moveViewToX(8);
+
+            int center = (int) 4000;
+            chart.centerViewTo(center,0, YAxis.AxisDependency.LEFT);
+            chart.setScaleMinima(0f,1.5f);
 
             chart.setData(data);
             chart.invalidate();
@@ -446,18 +467,20 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         protected Void doInBackground(Void... voids) {
 
             try {
-                genTone();
+//                makeTone();
                 while(!isCancelled()) {
                     int value = 1;
-                    Thread.sleep(5000);
-                    Handler toast_handler = new Handler(getMainLooper());
-                    toast_handler.post(new Runnable() {
-                        @Override
-                        public void run() { Toast.makeText(getApplicationContext(), "PlayAudio",
-                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
+                    Thread.sleep(2000);
+//                    Handler toast_handler = new Handler(getMainLooper());
+//                    toast_handler.post(new Runnable() {
+//                        @Override
+//                        public void run() { Toast.makeText(getApplicationContext(), "PlayAudio",
+//                    Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//                    playSound();
+                    playSound2();
+                    Thread.sleep(2000);
                     Log.d("RUNNABLE", "repeat chrip");
                 }
 
@@ -501,11 +524,14 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 chirping = false;
                 chirpText.setText("OFF");
                 chirpText.setTextColor(Color.parseColor("#DA334D"));
+                clearTone();
                 playTask.cancel(true);
             } else {
                 chirping = true;
                 chirpText.setText("ON");
                 chirpText.setTextColor(Color.parseColor("#33DA6D"));
+                genTone();
+                makeTone();
                 playTask = new PlayAudio();
 //                playTask.execute();
                 playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
@@ -518,17 +544,24 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         // numSamples = 8000
 
         // make frequency array
-        double[] freqOfToneArr = new double[numSamples];
+        double[] freqOfToneArr = new double[numSamples * DURATION_FREQ];
         double freqOfTones = START_FREQ;
+        double sigma = 0.8;
 
-        for (int i = 0; i < numSamples; i++) {
+        for (int i = 0; i < numSamples * DURATION_FREQ; i++) {
             freqOfToneArr[i] = freqOfTones++;
+//            freqOfToneArr[i] = freqOfTones;
+//            freqOfToneArr[i] = freqOfTones - (i*(END_FREQ - START_FREQ))/(numSamples*DURATION_FREQ);
         }
 
 
         // fill out the array
-        for (int i = 0; i < numSamples; ++i) {
-            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate) * freqOfToneArr[i]);
+        for (int i = 0; i < numSamples * DURATION_FREQ; ++i) {
+//            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate) * freqOfToneArr[i]);
+            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfToneArr[i]));
+//            double s = (i - (sample_size - 1) / 2) / (sigma*(sample_size - 1) / 2);
+//            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTones))*Math.exp(-(s*s)/ 2);
+//            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/START_FREQ));
         }
 
         // convert to 16 bit pcm sound array
@@ -545,9 +578,10 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     public void makeTone() {
         int pcm_i = 0;
         double sigma = 0.8;
-        double freqHz = START_FREQ;
-        if(pcm ==null || sample_size <= 0) return;
+        double freqHz = 4000;
+//        if(pcm ==null || sample_size <= 0) return;
         // make signal
+        sample_size = numSamples * DURATION_FREQ;
         for(int i = 0; i<sample_size;i++) {
             double s = (i - (sample_size - 1) / 2) / (sigma*(sample_size - 1) / 2);
             short val = (short) (Math.sin(freqHz * 2 * Math.PI * i / sampleRate)*Math.exp(-(s*s)/ 2) * 32767);
@@ -556,13 +590,34 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         }
     }
 
+    public void clearTone() {
+        Arrays.fill(generatedSnd, (byte) 0);
+        Arrays.fill(pcm, (byte) 0);
+    }
+
     public void playSound(){
         AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
                 8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-
-                AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
-        audioTrack.write(generatedSnd, 0, numSamples);
+                AudioFormat.ENCODING_PCM_16BIT, numSamples * DURATION_FREQ, AudioTrack.MODE_STATIC);
+        audioTrack.write(generatedSnd, 0, numSamples * DURATION_FREQ);
         audioTrack.play();
+    }
+
+    public void playSound2() {
+
+        try {
+            audioTrack = new AudioTrack.Builder()
+                    .setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build())
+                    .setAudioFormat(new AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build())
+                    .setBufferSizeInBytes(getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT))
+                    .build();
+
+            audioTrack.setVolume(1.0f);
+            audioTrack.write(pcm,0,pcm.length);
+            audioTrack.play();
+        } catch (Exception e) {
+            Log.e("AnalyzeActivity", "playSound2() + " + e.toString());
+        }
     }
 
 }  //activity

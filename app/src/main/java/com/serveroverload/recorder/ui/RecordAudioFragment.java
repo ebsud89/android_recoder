@@ -512,7 +512,7 @@ public class RecordAudioFragment extends Fragment {
 					Toast.makeText(
 							getActivity(),
 							getActivity().getResources().getString(
-									R.string.rec_fail),
+									R.string.rec_fail) + " Illegal",
 							Toast.LENGTH_LONG).show();
 					e.printStackTrace();
 
@@ -530,7 +530,7 @@ public class RecordAudioFragment extends Fragment {
 					Toast.makeText(
 							getActivity(),
 							getActivity().getResources().getString(
-									R.string.rec_fail),
+									R.string.rec_fail) + " IOException",
 							Toast.LENGTH_LONG).show();
 					e.printStackTrace();
 

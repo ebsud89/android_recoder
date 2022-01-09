@@ -4,10 +4,10 @@
     <string name="app_name">Audio Frequency Detector</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
-    <string name="rec_analyze">\nAnalysis View</string>
-    <string name="rec_cancel">\nExit</string>
-    <string name="rec_save">\nSave</string>
-    <string name="rec_info">\nRecord &amp; Detect - Audio Frequency\n\n</string>
+    <string name="rec_analyze">\nDetect Max Size Frequency View</string>
+    <string name="rec_cancel">Cancel</string>
+    <string name="rec_save">Save</string>
+    <string name="rec_info">Record &amp; Detect - Audio Frequency</string>
     <string name="rec_title">Audio Frequency Detector</string>
     <string name="rec_start">Recording Started</string>
     <string name="rec_fail">Recording Failed or Error</string>
