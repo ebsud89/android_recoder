@@ -51,7 +51,8 @@ public class RecordAudioFragment extends Fragment {
 	private final byte generatedSnd[] = new byte[2 * numSamples];
 
 	// sig_gen
-	private PlayFrequencyAudio pfg;
+	private PlayFrequencyAudio pfa;
+	private boolean pfa_on = false;
 
 	Handler soundhandler = new Handler();
 
@@ -71,7 +72,7 @@ public class RecordAudioFragment extends Fragment {
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
 
-		pfg = new PlayFrequencyAudio();
+		pfa = new PlayFrequencyAudio();
 
 		rootView = inflater.inflate(R.layout.record_audio_fragment, container,
 				false);
@@ -170,8 +171,15 @@ public class RecordAudioFragment extends Fragment {
 //
 //						recordSound();
 
-						if (pfg != null)
-							pfg.start();
+						if (pfa != null)
+							if (!pfa_on) {
+								pfa_on = true;
+								pfa.start();
+							}
+							else {
+								pfa_on = false;
+								pfa.stop();
+							}
 
 						return false;
 					}
@@ -583,8 +591,11 @@ public class RecordAudioFragment extends Fragment {
 
         protected PlayFrequencyAudio()
         {
-            frequency = 440.0;
-            level = 16384.0;
+            frequency = 1440.0;
+//            level = 16384.0;
+            level = 0.1;
+            waveform = SINE;
+            duty = 0.5f;
         }
 
         // Start
@@ -619,6 +630,11 @@ public class RecordAudioFragment extends Fragment {
         @SuppressWarnings("deprecation")
         protected void processAudio()
         {
+
+//   		AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+//						8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+//
+//			AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
             short buffer[];
 
             int rate =
