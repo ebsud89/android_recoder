@@ -11,8 +11,10 @@ import android.media.AudioManager;
 import android.media.AudioTrack;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -53,6 +55,7 @@ public class RecordAudioFragment extends Fragment {
 	// sig_gen
 	private PlayFrequencyAudio pfa;
 	private boolean pfa_on = false;
+	private PlayFrequencyTask pft;
 
 	Handler soundhandler = new Handler();
 
@@ -171,15 +174,20 @@ public class RecordAudioFragment extends Fragment {
 //
 //						recordSound();
 
-						if (pfa != null)
+						if (pfa != null) {
 							if (!pfa_on) {
 								pfa_on = true;
-								pfa.start();
-							}
-							else {
+//									pfa.start();
+									pft = new PlayFrequencyTask();
+									pft.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//									setFreqeuncy((double) (4000 + i));
+
+							} else {
 								pfa_on = false;
-								pfa.stop();
+//								pfa.stop();
+								pft.cancel(true);
 							}
+						}
 
 						return false;
 					}
@@ -719,4 +727,138 @@ public class RecordAudioFragment extends Fragment {
             audioTrack.release();
         }
     }
+
+    private void setFreqeuncy(double freq) {
+		pfa.frequency = freq;
+		pft.frequency = freq;
+	}
+
+	protected class PlayFrequencyTask extends AsyncTask<Void, Void, Void> {
+
+		protected static final int SINE = 0;
+        protected static final int SQUARE = 1;
+        protected static final int SAWTOOTH = 2;
+
+        protected int waveform;
+        protected boolean mute;
+
+        protected double frequency;
+        protected double level;
+
+        protected float duty;
+
+        protected Thread thread;
+
+        private AudioTrack audioTrack;
+
+        protected PlayFrequencyTask()
+        {
+            frequency = 1440.0;
+//            level = 16384.0;
+            level = 0.1;
+            waveform = SINE;
+            duty = 0.5f;
+        }
+
+		@Override
+		protected Void doInBackground(Void... voids) {
+
+			short buffer[];
+
+            int rate =
+                AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
+            int minSize =
+                AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO,
+                                            AudioFormat.ENCODING_PCM_16BIT);
+
+            // Find a suitable buffer size
+            int sizes[] = {1024, 2048, 4096, 8192, 16384, 32768};
+            int size = 0;
+
+            for (int s : sizes)
+            {
+                if (s > minSize)
+                {
+                    size = s;
+                    break;
+                }
+            }
+
+            final double K = 2.0 * Math.PI / rate;
+
+            // Create the audio track
+            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, rate,
+                                        AudioFormat.CHANNEL_OUT_MONO,
+                                        AudioFormat.ENCODING_PCM_16BIT,
+                                        size, AudioTrack.MODE_STREAM);
+//										size, AudioTrack.MODE_STATIC);
+            // Check audioTrack
+
+            // Check state
+            int state = audioTrack.getState();
+
+            if (state != AudioTrack.STATE_INITIALIZED)
+            {
+                audioTrack.release();
+                return null;
+            }
+
+            audioTrack.play();
+
+            // Create the buffer
+            buffer = new short[size];
+
+            // Initialise the generator variables
+            double f = frequency;
+            double l = 0.0;
+            double q = 0.0;
+
+//            while (thread != null)
+			while(pfa_on)
+            {
+                double t = (duty * 2.0 * Math.PI) - Math.PI;
+
+                // Fill the current buffer
+                for (int i = 0; i < buffer.length; i++)
+                {
+					frequency++;
+                    f += (frequency - f) / 4096.0;
+                    l += ((mute ? 0.0 : level) * 16384.0 - l) / 4096.0;
+                    q += ((q + (f * K)) < Math.PI) ? f * K :
+                        (f * K) - (2.0 * Math.PI);
+
+                    switch (waveform)
+                    {
+                    case SINE:
+                        buffer[i] = (short) Math.round(Math.sin(q) * l);
+                        break;
+
+                    case SQUARE:
+                        buffer[i] = (short) ((q > t) ? l : -l);
+                        break;
+
+                    case SAWTOOTH:
+                        buffer[i] = (short) Math.round((q / Math.PI) * l);
+                        break;
+                    }
+               }
+
+                audioTrack.write(buffer, 0, buffer.length);
+//                audioTrack.play();
+                try {
+					Thread.sleep(1000 * buffer.length / rate);
+				} catch (Exception e) {
+					Log.e("PlayFrequency", "PlayAudio Failed");
+				}
+//				audioTrack.stop();
+            }
+
+            audioTrack.stop();
+            audioTrack.release();
+
+
+			return null;
+		}
+	}
+
 }
