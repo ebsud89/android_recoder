@@ -50,6 +50,9 @@ public class RecordAudioFragment extends Fragment {
 	private final double freqOfTone = 16000; // hz
 	private final byte generatedSnd[] = new byte[2 * numSamples];
 
+	// sig_gen
+	private PlayFrequencyAudio pfg;
+
 	Handler soundhandler = new Handler();
 
 	private final Runnable mRunnable = new Runnable() {
@@ -67,6 +70,8 @@ public class RecordAudioFragment extends Fragment {
 	@Override
 	public View onCreateView(LayoutInflater inflater, ViewGroup container,
 			Bundle savedInstanceState) {
+
+		pfg = new PlayFrequencyAudio();
 
 		rootView = inflater.inflate(R.layout.record_audio_fragment, container,
 				false);
@@ -144,26 +149,29 @@ public class RecordAudioFragment extends Fragment {
 						Toast.makeText(getActivity(), "sound_output",
 								Toast.LENGTH_SHORT).show();
 
-						mySoundOuput = new MediaPlayer();
+//						mySoundOuput = new MediaPlayer();
+//
+//						// play PCM sound
+//						// Use a new tread as this can take a while
+//						Thread thread = new Thread(new Runnable()
+//						{
+//							public void run() {
+//								genTone();
+//								handler.post(new Runnable()
+//								{
+//									public void run() {
+//										playSound();
+//									}
+//								});
+//							}
+//						});
+//
+//						thread.start();
+//
+//						recordSound();
 
-						// play PCM sound
-						// Use a new tread as this can take a while
-						Thread thread = new Thread(new Runnable()
-						{
-							public void run() {
-								genTone();
-								handler.post(new Runnable()
-								{
-									public void run() {
-										playSound();
-									}
-								});
-							}
-						});
-
-						thread.start();
-
-						recordSound();
+						if (pfg != null)
+							pfg.start();
 
 						return false;
 					}
@@ -554,4 +562,145 @@ public class RecordAudioFragment extends Fragment {
 				isRecording = false;
 			}
 	}
+
+	protected class PlayFrequencyAudio implements Runnable
+    {
+        protected static final int SINE = 0;
+        protected static final int SQUARE = 1;
+        protected static final int SAWTOOTH = 2;
+
+        protected int waveform;
+        protected boolean mute;
+
+        protected double frequency;
+        protected double level;
+
+        protected float duty;
+
+        protected Thread thread;
+
+        private AudioTrack audioTrack;
+
+        protected PlayFrequencyAudio()
+        {
+            frequency = 440.0;
+            level = 16384.0;
+        }
+
+        // Start
+        protected void start()
+        {
+            thread = new Thread(this, "Audio");
+            thread.start();
+        }
+
+        // Stop
+        protected void stop()
+        {
+            Thread t = thread;
+            thread = null;
+
+            try
+            {
+                // Wait for the thread to exit
+                if (t != null && t.isAlive())
+                    t.join();
+            }
+
+            catch (Exception e) {}
+        }
+
+        public void run()
+        {
+            processAudio();
+        }
+
+        // Process audio
+        @SuppressWarnings("deprecation")
+        protected void processAudio()
+        {
+            short buffer[];
+
+            int rate =
+                AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
+            int minSize =
+                AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO,
+                                            AudioFormat.ENCODING_PCM_16BIT);
+
+            // Find a suitable buffer size
+            int sizes[] = {1024, 2048, 4096, 8192, 16384, 32768};
+            int size = 0;
+
+            for (int s : sizes)
+            {
+                if (s > minSize)
+                {
+                    size = s;
+                    break;
+                }
+            }
+
+            final double K = 2.0 * Math.PI / rate;
+
+            // Create the audio track
+            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, rate,
+                                        AudioFormat.CHANNEL_OUT_MONO,
+                                        AudioFormat.ENCODING_PCM_16BIT,
+                                        size, AudioTrack.MODE_STREAM);
+            // Check audioTrack
+
+            // Check state
+            int state = audioTrack.getState();
+
+            if (state != AudioTrack.STATE_INITIALIZED)
+            {
+                audioTrack.release();
+                return;
+            }
+
+            audioTrack.play();
+
+            // Create the buffer
+            buffer = new short[size];
+
+            // Initialise the generator variables
+            double f = frequency;
+            double l = 0.0;
+            double q = 0.0;
+
+            while (thread != null)
+            {
+                double t = (duty * 2.0 * Math.PI) - Math.PI;
+
+                // Fill the current buffer
+                for (int i = 0; i < buffer.length; i++)
+                {
+                    f += (frequency - f) / 4096.0;
+                    l += ((mute ? 0.0 : level) * 16384.0 - l) / 4096.0;
+                    q += ((q + (f * K)) < Math.PI) ? f * K :
+                        (f * K) - (2.0 * Math.PI);
+
+                    switch (waveform)
+                    {
+                    case SINE:
+                        buffer[i] = (short) Math.round(Math.sin(q) * l);
+                        break;
+
+                    case SQUARE:
+                        buffer[i] = (short) ((q > t) ? l : -l);
+                        break;
+
+                    case SAWTOOTH:
+                        buffer[i] = (short) Math.round((q / Math.PI) * l);
+                        break;
+                    }
+               }
+
+                audioTrack.write(buffer, 0, buffer.length);
+            }
+
+            audioTrack.stop();
+            audioTrack.release();
+        }
+    }
 }

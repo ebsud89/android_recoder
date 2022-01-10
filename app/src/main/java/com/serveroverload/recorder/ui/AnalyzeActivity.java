@@ -26,6 +26,7 @@ import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -67,6 +68,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     //frequency -> 측정 주파수 대역으로 퓨리에 변환 시 f/2 만큼의 크기의 주파수를 분석 할 수 있음.
     //blockSize -> 한 분기마다 측정하는 사이즈로 double 배열로 저장 시 , b/2 개의 배열이 나옴. f/b -> 배열 하나에 할당되는 주파수 범위로 8192/2048 -> 4Hz임
 
+    ImageButton backButton;
     Button analyzeButton;
     Button chirpButton;
     TextView analyzeText;
@@ -129,6 +131,9 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         setContentView(R.layout.activity_analyze);
 
         context = this;
+
+        backButton = (ImageButton) findViewById(R.id.BackButton);
+        backButton.setOnClickListener(this);
 
         analyzeButton = (Button) findViewById(R.id.AnalyzeButton);
         analyzeButton.setOnClickListener(this);
@@ -495,7 +500,10 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     public void onClick(View arg0) {
 
 
-        if(arg0.getId() == R.id.AnalyzeButton) {
+        if (arg0.getId() == R.id.BackButton) {
+            AnalyzeActivity.this.finish();
+        }
+        else if(arg0.getId() == R.id.AnalyzeButton) {
 
             if (started) {
                 Toast.makeText(this.getApplicationContext(), "stop analyzing",
