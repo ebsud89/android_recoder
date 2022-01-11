@@ -42,4 +42,8 @@
     <string name="hello_first_fragment">Hello first fragment</string>
     <string name="hello_second_fragment">Hello second fragment. Arg: %1$s</string>
 
+    <!-- DetectorView Constants -->
+    <string name="detector_element_height">16dp</string>
+    <string name="detector_element_width">16dp</string>
+
 </resources>

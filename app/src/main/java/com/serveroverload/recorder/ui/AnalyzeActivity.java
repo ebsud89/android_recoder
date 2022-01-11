@@ -14,6 +14,8 @@ import android.media.AudioManager;
 import android.media.AudioRecord;
 import android.media.AudioTrack;
 import static android.media.AudioTrack.*;
+import static java.security.AccessController.getContext;
+
 import android.media.MediaRecorder;
 import android.media.audiofx.NoiseSuppressor;
 import android.os.AsyncTask;
@@ -25,13 +27,18 @@ import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.TableLayout;
+import android.widget.TableRow;
 import android.widget.TextView;
 
 import androidx.core.app.ActivityCompat;
 
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Map;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
 import android.media.audiofx.NoiseSuppressor;
@@ -44,6 +51,7 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import org.jtransforms.fft.DoubleFFT_1D;
+import org.w3c.dom.Text;
 
 import com.serveroverload.recorder.R;
 import com.serveroverload.recorder.util.PreferenceManager;
@@ -55,6 +63,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     private double END_FREQ = 0.0;
     private int DURATION_FREQ = 1;
     private int INTERVAL_FREQ = 3;
+    private int CHIRP_SEQ = 1;
 
 
 //    int frequency = 8192; //주파수가 8192일 경우 4096 까지 측정이 가능함
@@ -120,6 +129,12 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     TextView t1 ;
     TextView t2 ;
 
+    // Detector View
+    FrequencyDetector detector;
+    TextView count_view;
+    TextView timestamp_view;
+    TableLayout detector_table;
+
 
     //스레드 관련 부분 1
     // scaleThread scThr = new scaleThread();
@@ -174,6 +189,19 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         t0 = (TextView)findViewById(R.id.HzText0);
         t1 = (TextView)findViewById(R.id.HzText1);
         t2 = (TextView)findViewById(R.id.HzText2);
+
+
+        // Detector View
+        detector = new FrequencyDetector();
+
+        count_view = (TextView) findViewById(R.id.DetectorCount);
+        timestamp_view = (TextView) findViewById(R.id.DetectorTimestamp);
+        detector_table = (TableLayout) findViewById(R.id.DetectorTable);
+
+        detector.makeDetectorTable();
+
+        // TODO
+        // 테이블 아이템을 ArrayList 에 넣어서 setText() & background 편하게 할 수 있게?
 
 
         chart =(BarChart)findViewById(R.id.chart);
@@ -240,9 +268,13 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
+
         if(pfa != null && handler != null)
             handler.removeCallbacks(pfa);
+
+        pfa = null;
+        handler = null;
+        super.onDestroy();
     }
 
     // 이 액티비티의 작업들은 대부분 RecordAudio라는 클래스에서 진행된다. 이 클래스는 AsyncTask를 확장한다.
@@ -347,8 +379,6 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 }
             }
 
-
-
             ArrayList<Integer> hzList = new ArrayList<Integer>();
             ArrayList<Double> hzSize = new ArrayList<Double>();
 
@@ -357,9 +387,10 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 if(toTransform[0][i]>30){
                     hzList.add(i);   //list에는 대역대가들어감 배열 i 순서
                     hzSize.add(toTransform[0][i]); //list에는 toTransform[][i]의 안에있는 값(크기) 가들어감
+                    detector.addFrequencyData(i, toTransform[0][i]);
                 }
             }
-
+            detector.show();
 
             Iterator iter = hzList.iterator();
             if(iter.hasNext()==true){
@@ -753,7 +784,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 buffer[i] = (short) Math.round(Math.sin(q) * l);
             }
 
-
+            CHIRP_SEQ++;
             audioTrack.write(buffer, 0, buffer.length);
 
             audioTrack.stop();
@@ -762,6 +793,89 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             // repeat
             if (chirping)
                 handler.postDelayed(pfa, 1000 * INTERVAL_FREQ);
+        }
+    }
+
+    private class FrequencyDetector {
+
+        public class FrequencyData {
+            private int freq;
+            private double size;
+            private String timestamp;
+            private int seq;
+
+            public FrequencyData(int freq, double size, String timestamp) {
+                this.freq = freq;
+                this.size = size;
+                this.timestamp = timestamp;
+                this.seq = CHIRP_SEQ;
+            }
+        }
+
+        // TODO
+        // 감지할 10~20 개 점 표현 및 활용
+        public ArrayList<FrequencyData> data_list;
+        public int data_list_size;
+        public String last_timestamp;
+//        ArrayList<Integer> hzList = new ArrayList<Integer>();
+//        ArrayList<Double> hzSize = new ArrayList<Double>();
+
+        public FrequencyDetector() {
+            data_list = new ArrayList<FrequencyData>();
+            data_list_size = 0;
+        }
+
+        public void addFrequencyData(Integer freq, Double size) {
+
+            Timestamp current = new Timestamp(System.currentTimeMillis());
+            SimpleDateFormat sdf = new SimpleDateFormat ("yyyy-MM-dd hh:mm:ss");
+            String timestamp = sdf.format(current);
+
+            FrequencyData temp = new FrequencyData(freq, size, timestamp);
+
+            data_list.add(temp);
+        }
+
+        public int getDataListSizeInRange() {
+            int count = 0;
+
+            for (int i = 0; i < data_list.size(); i++) {
+                FrequencyData tmp = data_list.get(i);
+                if ((tmp.freq >= START_FREQ) && (tmp.freq <= END_FREQ)) {
+                    if (tmp.size > 0) {
+                        // TODO : fix detected count
+                        count++;
+                        data_list_size++;
+                    }
+                }
+            }
+
+            return data_list_size;
+        }
+
+        public void show() {
+            int count = getDataListSizeInRange();
+            count_view.setText("CHIRP : " + Integer.toString(CHIRP_SEQ-1) + " / TOTAL : " + Integer.toString(count));
+//            timestamp_view.setText();
+        }
+
+        public void makeDetectorTable() {
+            // TODO
+            // https://stackoverflow.com/questions/5391624/how-to-scroll-tableview-in-android
+            // https://stackoverflow.com/questions/6513718/how-to-make-a-scrollable-tablelayout
+
+            // https://4z7l.github.io/2020/09/17/android-context.html
+            TableRow row = new TableRow(getApplicationContext());
+
+            TextView tv1 = new TextView(getApplicationContext());
+            TextView tv2 = new TextView(getApplicationContext());
+            TextView tv3 = new TextView(getApplicationContext());
+
+            row.addView(tv1);
+            row.addView(tv2);
+            row.addView(tv3);
+
+            detector_table.addView(row, new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
         }
     }
 

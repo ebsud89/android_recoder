@@ -5,4 +5,7 @@
     <dimen name="activity_vertical_margin">16dp</dimen>
     <dimen name="fab_margin">16dp</dimen>
 
+    <!-- DetectorView Constants -->
+    <dimen name="detector_element_height">16dp</dimen>
+    <dimen name="detector_element_width">16dp</dimen>
 </resources>
