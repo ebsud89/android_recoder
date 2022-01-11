@@ -74,7 +74,7 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
+        android:layout_marginTop="10dp"
         android:layout_marginLeft="16dp"
         android:textColor="@color/white"
         android:text=" Detect Frequency (using FFT in Jtransform)" />
@@ -96,8 +96,8 @@
     <com.github.mikephil.charting.charts.BarChart
         android:id="@+id/chart"
         android:layout_width="match_parent"
-        android:layout_height="340dp"
-        android:layout_marginTop="32dp">
+        android:layout_height="320dp"
+        android:layout_marginTop="16dp">
 
     </com.github.mikephil.charting.charts.BarChart>
 
@@ -186,7 +186,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="300dp"
+        android:layout_height="320dp"
         android:layout_below="@+id/table_layout"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="4dp"

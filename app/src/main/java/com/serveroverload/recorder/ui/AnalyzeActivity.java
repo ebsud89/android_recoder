@@ -56,15 +56,16 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     private int DURATION_FREQ = 1;
     private int INTERVAL_FREQ = 3;
 
-    int test_modifier = 8;
 
-    int frequency = 8192 * test_modifier; //주파수가 8192일 경우 4096 까지 측정이 가능함
+//    int frequency = 8192; //주파수가 8192일 경우 4096 까지 측정이 가능함
+    int frequency = 48000;
     int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
     int audioEncoding = AudioFormat.ENCODING_PCM_16BIT;
 
     private RealDoubleFFT transformer;
-    int blockSize = 4096 * test_modifier; // 2048->1024개의 배열이 나옴. 배열 한 칸당 4hz의 범위를 포함하고 있음. //4096->배열 2048이고 한칸당 2hz //배열 번호 1씩 증가-> hz는 2씩 증가한다.
+//    int blockSize = 4096; // 2048->1024개의 배열이 나옴. 배열 한 칸당 4hz의 범위를 포함하고 있음. //4096->배열 2048이고 한칸당 2hz //배열 번호 1씩 증가-> hz는 2씩 증가한다.
     //배열이 40일때 hz는 80헤르츠를 가지고있다는것.
+    int blockSize = 24000;
     DoubleFFT_1D fft = new DoubleFFT_1D(blockSize); //JTransform 라이브러리로 FFT 수행
 
     String scale2 ;
@@ -383,7 +384,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             chart.setVisibleXRangeMaximum(6400);
             chart.moveViewToX(8);
 
-            int center = (int) 4000;
+            int center = (int) START_FREQ;
             chart.centerViewTo(center,0, YAxis.AxisDependency.LEFT);
             chart.setScaleMinima(0f,1.5f);
 
