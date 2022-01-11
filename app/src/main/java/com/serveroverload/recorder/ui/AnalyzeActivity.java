@@ -2,10 +2,7 @@ package com.serveroverload.recorder.ui;
 
 import android.Manifest;
 import android.app.Activity;
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Context;
-import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -238,6 +235,13 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             ActivityCompat.requestPermissions(AnalyzeActivity.this, new String[]{Manifest.permission.RECORD_AUDIO, Manifest.permission.WRITE_EXTERNAL_STORAGE}, 0);
         }
         //오디오 녹음을 사용할 것인지 권한 여부를 체크해주는 코드로, 없으면 동작 안됨! +) AndroidManifest에도 오디오 권한 부분 추가되있음
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if(pfa != null && handler != null)
+            handler.removeCallbacks(pfa);
     }
 
     // 이 액티비티의 작업들은 대부분 RecordAudio라는 클래스에서 진행된다. 이 클래스는 AsyncTask를 확장한다.
@@ -661,7 +665,6 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         protected PlayFrequencyAudio()
         {
             frequency = 1440.0;
-//            level = 16384.0;
             level = 0.1;
             waveform = SINE;
             duty = 0.5f;
@@ -700,48 +703,27 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         protected void processAudio()
         {
 
-//   		AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
-//						8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
-//
-//			AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
             short buffer[];
 
-            int rate = 48000;
-//                AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
+            int rate = 48000;   // max rate
             int minSize =
                     AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO,
                             AudioFormat.ENCODING_PCM_16BIT);
 
-            // Find a suitable buffer size
-            int sizes[] = {1024, 2048, 4096, 8192, 16384, 32768};
-            int size = 0;
-
-            for (int s : sizes)
-            {
-                if (s > minSize)
-                {
-                    size = s;
-                    break;
-                }
-            }
-
             // Duration = size / rate
-            size = 48000;
+            int size = 48000 * DURATION_FREQ;
 
             final double K = 2.0 * Math.PI / rate;
 
-            // Create the audio track
             audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, rate,
                     AudioFormat.CHANNEL_OUT_MONO,
                     AudioFormat.ENCODING_PCM_16BIT,
                     size, AudioTrack.MODE_STREAM);
-            // Check audioTrack
 
             // Check state
             int state = audioTrack.getState();
 
-            if (state != AudioTrack.STATE_INITIALIZED)
-            {
+            if (state != AudioTrack.STATE_INITIALIZED) {
                 audioTrack.release();
                 return;
             }
@@ -752,46 +734,33 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             buffer = new short[size];
 
             // Initialise the generator variables
-            double f = frequency;
+            double f = START_FREQ;
             double l = 0.0;
             double q = 0.0;
 
-//            while (thread != null)
-//            {
             double t = (duty * 2.0 * Math.PI) - Math.PI;
 
             // Fill the current buffer
-            for (int i = 0; i < buffer.length; i++)
-            {
+            for (int i = 0; i < buffer.length; i++) {
+
+                frequency = START_FREQ + i * ((END_FREQ-START_FREQ) / size);
                 f += (frequency - f) / 4096.0;
                 l += ((mute ? 0.0 : level) * 16384.0 - l) / 4096.0;
                 q += ((q + (f * K)) < Math.PI) ? f * K :
                         (f * K) - (2.0 * Math.PI);
 
-                switch (waveform)
-                {
-                    case SINE:
-                        buffer[i] = (short) Math.round(Math.sin(q) * l);
-                        break;
-
-                    case SQUARE:
-                        buffer[i] = (short) ((q > t) ? l : -l);
-                        break;
-
-                    case SAWTOOTH:
-                        buffer[i] = (short) Math.round((q / Math.PI) * l);
-                        break;
-                }
+                buffer[i] = (short) Math.round(Math.sin(q) * l);
             }
 
+
             audioTrack.write(buffer, 0, buffer.length);
-//            }
 
             audioTrack.stop();
             audioTrack.release();
 
+            // repeat
             if (chirping)
-                handler.postDelayed(pfa, 1000);
+                handler.postDelayed(pfa, 1000 * INTERVAL_FREQ);
         }
     }
 

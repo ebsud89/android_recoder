@@ -27,6 +27,7 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     Button durationFreqButton;
     Button intervalFreqButton;
     Button saveButton;
+    Button defaultButton;
     Button exitButton;
 
     EditText startFreqEditText;
@@ -62,15 +63,21 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
         startFreqEditText = (EditText) rootView.findViewById(R.id.start_frequency);
         startFreqEditText.setText(Integer.toString(before_start_freq));
+        startFreqEditText.setOnClickListener(this);
         endFreqEditText = (EditText) rootView.findViewById(R.id.end_frequency);
         endFreqEditText.setText(Integer.toString(before_end_freq));
+        endFreqEditText.setOnClickListener(this);
         durationFreqEditText = (EditText) rootView.findViewById(R.id.duration_frequency);
         durationFreqEditText.setText(Integer.toString(before_duration));
+        durationFreqEditText.setOnClickListener(this);
         intervalFreqEditText = (EditText) rootView.findViewById(R.id.interval_frequency);
         intervalFreqEditText.setText(Integer.toString(before_interval));
+        intervalFreqEditText.setOnClickListener(this);
 
         saveButton = (Button) rootView.findViewById(R.id.save_button);
         saveButton.setOnClickListener(this);
+        defaultButton = (Button) rootView.findViewById(R.id.default_button);
+        defaultButton.setOnClickListener(this);
         exitButton = (Button) rootView.findViewById(R.id.exit_button);
         exitButton.setOnClickListener(this);
 
@@ -92,6 +99,16 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         } else if (arg0.getId() == R.id.interval_button) {
             int current_interval = PreferenceManager.getInt(getActivity(), "interval_freq");
             intervalFreqEditText.setText(Integer.toString(current_interval));
+        } else if (arg0.getId() == R.id.default_button) {
+            PreferenceManager.clear(getActivity());
+            PreferenceManager.setInt(getActivity(), "start_freq", 12000);
+            PreferenceManager.setInt(getActivity(), "end_freq", 16000);
+            PreferenceManager.setInt(getActivity(), "duration_freq", 1);
+            PreferenceManager.setInt(getActivity(), "interval_freq", 3);
+            startFreqEditText.setText(Integer.toString(12000));
+            endFreqEditText.setText(Integer.toString(16000));
+            durationFreqEditText.setText(Integer.toString(1));
+            intervalFreqEditText.setText(Integer.toString(3));
         } else if (arg0.getId() == R.id.save_button) {
             int new_start = before_start_freq;
             int new_end = before_end_freq;
@@ -113,6 +130,20 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
                     Toast.LENGTH_SHORT).show();
             closeFragment();
         }
+
+        switch (arg0.getId()) {
+            case R.id.start_frequency:
+                startFreqEditText.getText().clear();
+            case R.id.end_frequency:
+                endFreqEditText.getText().clear();
+            case R.id.duration_frequency:
+                durationFreqEditText.getText().clear();
+            case R.id.interval_frequency:
+                intervalFreqEditText.getText().clear();
+            default:
+                break;
+        }
+
     }
 
     private void closeFragment() {

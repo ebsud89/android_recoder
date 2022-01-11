@@ -7,6 +7,7 @@
     <string name="rec_analyze">\nDetect Max Size Frequency View</string>
     <string name="rec_cancel">Cancel</string>
     <string name="rec_save">Save</string>
+    <string name="rec_default">Default</string>
     <string name="rec_info">Record &amp; Detect - Audio Frequency</string>
     <string name="rec_title">Audio Frequency Detector</string>
     <string name="rec_start">Recording Started</string>

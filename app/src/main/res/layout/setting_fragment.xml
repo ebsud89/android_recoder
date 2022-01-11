@@ -163,10 +163,26 @@
         />
 
     <Button
-        android:id="@+id/exit_button"
+        android:id="@+id/default_button"
         android:layout_width="210dp"
         android:layout_height="58dp"
         android:layout_below="@+id/save_button"
+        android:layout_gravity="center_vertical"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="10dp"
+        android:layout_marginStart="96dp"
+        android:background="@color/color_blue_2"
+        android:text="@string/rec_default"
+        android:textAllCaps="false"
+        android:textColor="@color/white"
+        android:textSize="20sp"
+        />
+
+    <Button
+        android:id="@+id/exit_button"
+        android:layout_width="210dp"
+        android:layout_height="58dp"
+        android:layout_below="@+id/default_button"
         android:layout_gravity="center_vertical"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="10dp"
