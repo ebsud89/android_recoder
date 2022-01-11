@@ -38,6 +38,7 @@ public class HomeActivity extends FragmentActivity {
 		PreferenceManager.setInt(this, "start_freq", 12000);
 		PreferenceManager.setInt(this, "end_freq", 16000);
 		PreferenceManager.setInt(this, "duration_freq", 1);
+		PreferenceManager.setInt(this, "interval_freq", 3);
 
 		androidx.fragment.app.FragmentManager fragmentManager= getSupportFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();

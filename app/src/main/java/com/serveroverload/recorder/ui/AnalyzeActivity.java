@@ -53,6 +53,12 @@ import com.serveroverload.recorder.util.PreferenceManager;
 
 public class AnalyzeActivity extends Activity implements OnClickListener {
 
+    // PreferenceManager
+    private double START_FREQ = 0.0;
+    private double END_FREQ = 0.0;
+    private int DURATION_FREQ = 1;
+    private int INTERVAL_FREQ = 3;
+
     int test_modifier = 8;
 
     int frequency = 8192 * test_modifier; //주파수가 8192일 경우 4096 까지 측정이 가능함
@@ -91,9 +97,6 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     private double sample[] = null;
     private final double freqOfTone = 6000; // hz
     private byte[] generatedSnd = null;
-    private double START_FREQ = 0;
-    private double END_FREQ = 0;
-    private int DURATION_FREQ = 1;
 
     // play PCM sound (makeTone)
     private int sample_size = numSamples;
@@ -150,10 +153,11 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
         chirpText = (TextView) findViewById(R.id.ChirpText);
 
-        // Chirp freqeuncy
+        // PreferenceManager
         START_FREQ = (double) PreferenceManager.getInt(this, "start_freq");
         END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
         DURATION_FREQ = PreferenceManager.getInt(this, "duration_freq");
+        INTERVAL_FREQ = PreferenceManager.getInt(this, "interval_freq");
 
         sample = new double[numSamples * DURATION_FREQ];
         generatedSnd = new byte[2 * numSamples * DURATION_FREQ];

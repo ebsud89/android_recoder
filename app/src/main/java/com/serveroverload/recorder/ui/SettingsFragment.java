@@ -25,16 +25,19 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
     Button startFreqButton;
     Button endFreqButton;
     Button durationFreqButton;
+    Button intervalFreqButton;
     Button saveButton;
     Button exitButton;
 
     EditText startFreqEditText;
     EditText endFreqEditText;
     EditText durationFreqEditText;
+    EditText intervalFreqEditText;
 
     int before_start_freq = 12000;
     int before_end_freq = 16000;
     int before_duration = 1;
+    int before_interval = 3;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -49,10 +52,13 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         endFreqButton.setOnClickListener(this);
         durationFreqButton = (Button) rootView.findViewById(R.id.duration_button);
         durationFreqButton.setOnClickListener(this);
+        intervalFreqButton = (Button) rootView.findViewById(R.id.interval_button);
+        intervalFreqButton.setOnClickListener(this);
 
         before_start_freq = PreferenceManager.getInt(getActivity(), "start_freq");
         before_end_freq = PreferenceManager.getInt(getActivity(), "end_freq");
         before_duration = PreferenceManager.getInt(getActivity(), "duration_freq");
+        before_interval = PreferenceManager.getInt(getActivity(), "interval_freq");
 
         startFreqEditText = (EditText) rootView.findViewById(R.id.start_frequency);
         startFreqEditText.setText(Integer.toString(before_start_freq));
@@ -60,6 +66,8 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         endFreqEditText.setText(Integer.toString(before_end_freq));
         durationFreqEditText = (EditText) rootView.findViewById(R.id.duration_frequency);
         durationFreqEditText.setText(Integer.toString(before_duration));
+        intervalFreqEditText = (EditText) rootView.findViewById(R.id.interval_frequency);
+        intervalFreqEditText.setText(Integer.toString(before_interval));
 
         saveButton = (Button) rootView.findViewById(R.id.save_button);
         saveButton.setOnClickListener(this);
@@ -81,6 +89,9 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         } else if (arg0.getId() == R.id.duration_button) {
             int current_duration = PreferenceManager.getInt(getActivity(), "duration_freq");
             durationFreqEditText.setText(Integer.toString(current_duration));
+        } else if (arg0.getId() == R.id.interval_button) {
+            int current_interval = PreferenceManager.getInt(getActivity(), "interval_freq");
+            intervalFreqEditText.setText(Integer.toString(current_interval));
         } else if (arg0.getId() == R.id.save_button) {
             int new_start = before_start_freq;
             int new_end = before_end_freq;

@@ -21,9 +21,9 @@
             android:id="@+id/start_frequency"
             android:layout_width="176dp"
             android:layout_height="54dp"
-            android:layout_marginLeft="24dp"
+            android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
             android:gravity="center"
             android:textColor="@color/color_blue_5"
@@ -36,7 +36,7 @@
             android:layout_width="152dp"
             android:layout_height="54dp"
             android:layout_marginTop="6dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             android:background="@color/color_blue_2"
             android:textAllCaps="false"
             android:textColor="@color/white"
@@ -45,7 +45,7 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/middle_section"
+        android:id="@+id/end_section"
         android:layout_width="match_parent"
         android:layout_height="92dp"
         android:layout_below="@id/start_section"
@@ -55,9 +55,9 @@
             android:id="@+id/end_frequency"
             android:layout_width="176dp"
             android:layout_height="54dp"
-            android:layout_marginLeft="24dp"
+            android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
             android:gravity="center"
             android:background="@color/color_blue_1"
@@ -69,7 +69,7 @@
             android:id="@+id/end_button"
             android:layout_width="152dp"
             android:layout_height="54dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             android:layout_marginTop="6dp"
             android:background="@color/color_blue_2"
             android:textAllCaps="false"
@@ -79,23 +79,23 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/end_section"
+        android:id="@+id/duration_section"
         android:layout_width="match_parent"
         android:layout_height="92dp"
-        android:layout_below="@id/middle_section"
+        android:layout_below="@id/end_section"
         android:orientation="horizontal">
 
         <EditText
             android:id="@+id/duration_frequency"
             android:layout_width="176dp"
             android:layout_height="54dp"
-            android:layout_marginLeft="24dp"
+            android:layout_marginStart="24dp"
             android:layout_marginTop="16dp"
-            android:layout_marginRight="4dp"
+            android:layout_marginEnd="4dp"
             android:layout_marginBottom="4dp"
             android:gravity="center"
             android:background="@color/color_blue_1"
-            android:hint="Enter 'end freq.'"
+            android:hint="Enter 'duration freq.'"
             android:textColor="@color/color_blue_5"
             android:inputType="phone" />
 
@@ -103,7 +103,7 @@
             android:id="@+id/duration_button"
             android:layout_width="152dp"
             android:layout_height="54dp"
-            android:layout_marginLeft="20dp"
+            android:layout_marginStart="20dp"
             android:layout_marginTop="6dp"
             android:background="@color/color_blue_2"
             android:textAllCaps="false"
@@ -112,15 +112,49 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:id="@+id/interval_section"
+        android:layout_width="match_parent"
+        android:layout_height="92dp"
+        android:layout_below="@id/duration_section"
+        android:orientation="horizontal">
+
+        <EditText
+            android:id="@+id/interval_frequency"
+            android:layout_width="176dp"
+            android:layout_height="54dp"
+            android:layout_marginStart="24dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:gravity="center"
+            android:background="@color/color_blue_1"
+            android:hint="Enter 'interval freq.'"
+            android:textColor="@color/color_blue_5"
+            android:inputType="phone" />
+
+        <Button
+            android:id="@+id/interval_button"
+            android:layout_width="152dp"
+            android:layout_height="54dp"
+            android:layout_marginStart="20dp"
+            android:layout_marginTop="6dp"
+            android:background="@color/color_blue_2"
+            android:textAllCaps="false"
+            android:textColor="@color/white"
+            android:text="Load current\nInterval (s)" />
+
+    </LinearLayout>
+
     <Button
         android:id="@+id/save_button"
         android:layout_width="210dp"
         android:layout_height="58dp"
-        android:layout_below="@+id/end_section"
+        android:layout_below="@+id/interval_section"
         android:layout_gravity="center_horizontal"
         android:layout_marginTop="22dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="96dp"
+        android:layout_marginStart="96dp"
         android:background="@color/color_blue_2"
         android:text="@string/rec_save"
         android:textAllCaps="false"
@@ -136,7 +170,7 @@
         android:layout_gravity="center_vertical"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="10dp"
-        android:layout_marginLeft="96dp"
+        android:layout_marginStart="96dp"
         android:background="@color/color_blue_2"
         android:text="@string/rec_cancel"
         android:textAllCaps="false"
