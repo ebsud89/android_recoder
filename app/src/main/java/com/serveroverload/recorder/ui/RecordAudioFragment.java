@@ -177,15 +177,17 @@ public class RecordAudioFragment extends Fragment {
 						if (pfa != null) {
 							if (!pfa_on) {
 								pfa_on = true;
-//									pfa.start();
-									pft = new PlayFrequencyTask();
-									pft.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-//									setFreqeuncy((double) (4000 + i));
-
+////									pfa.start();
+//									pft = new PlayFrequencyTask();
+//									pft.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+////									setFreqeuncy((double) (4000 + i));
+								pfa = new PlayFrequencyAudio();
+								handler.post(pfa);
 							} else {
 								pfa_on = false;
 //								pfa.stop();
-								pft.cancel(true);
+//								pft.cancel(true);
+								handler.removeCallbacks(pfa);
 							}
 						}
 
@@ -645,8 +647,8 @@ public class RecordAudioFragment extends Fragment {
 //			AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
             short buffer[];
 
-            int rate =
-                AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
+            int rate = 48000;
+//                AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
             int minSize =
                 AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO,
                                             AudioFormat.ENCODING_PCM_16BIT);
@@ -663,6 +665,9 @@ public class RecordAudioFragment extends Fragment {
                     break;
                 }
             }
+
+            // Duration = size / rate
+			size = 48000;
 
             final double K = 2.0 * Math.PI / rate;
 
@@ -692,8 +697,8 @@ public class RecordAudioFragment extends Fragment {
             double l = 0.0;
             double q = 0.0;
 
-            while (thread != null)
-            {
+//            while (thread != null)
+//            {
                 double t = (duty * 2.0 * Math.PI) - Math.PI;
 
                 // Fill the current buffer
@@ -721,16 +726,19 @@ public class RecordAudioFragment extends Fragment {
                }
 
                 audioTrack.write(buffer, 0, buffer.length);
-            }
+//            }
 
             audioTrack.stop();
             audioTrack.release();
+
+            if (pfa_on)
+            	handler.postDelayed(pfa, 1000);
         }
     }
 
     private void setFreqeuncy(double freq) {
 		pfa.frequency = freq;
-		pft.frequency = freq;
+//		pft.frequency = freq;
 	}
 
 	protected class PlayFrequencyTask extends AsyncTask<Void, Void, Void> {

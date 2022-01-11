@@ -101,6 +101,9 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
     private AudioTrack audioTrack = null;
 
+    // sig_gen
+    private PlayFrequencyAudio pfa;
+
     ImageView imageView;
     Bitmap bitmap;
     Canvas canvas;
@@ -120,6 +123,8 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     //스레드 관련 부분 1
     // scaleThread scThr = new scaleThread();
     double[] mag = new double[blockSize/2];
+
+    private Handler handler = new Handler();
 
     Context context;
 
@@ -532,17 +537,20 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 chirping = false;
                 chirpText.setText("OFF");
                 chirpText.setTextColor(Color.parseColor("#DA334D"));
-                clearTone();
-                playTask.cancel(true);
+//                clearTone();
+//                playTask.cancel(true);
+                handler.removeCallbacks(pfa);
             } else {
                 chirping = true;
                 chirpText.setText("ON");
                 chirpText.setTextColor(Color.parseColor("#33DA6D"));
-                genTone();
-                makeTone();
-                playTask = new PlayAudio();
-//                playTask.execute();
-                playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+//                genTone();
+//                makeTone();
+//                playTask = new PlayAudio();
+////                playTask.execute();
+//                playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                pfa = new PlayFrequencyAudio();
+                handler.post(pfa);
             }
         }
     }
@@ -625,6 +633,161 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             audioTrack.play();
         } catch (Exception e) {
             Log.e("AnalyzeActivity", "playSound2() + " + e.toString());
+        }
+    }
+
+    protected class PlayFrequencyAudio implements Runnable
+    {
+        protected static final int SINE = 0;
+        protected static final int SQUARE = 1;
+        protected static final int SAWTOOTH = 2;
+
+        protected int waveform;
+        protected boolean mute;
+
+        protected double frequency;
+        protected double level;
+
+        protected float duty;
+
+        protected Thread thread;
+
+        private AudioTrack audioTrack;
+
+        protected PlayFrequencyAudio()
+        {
+            frequency = 1440.0;
+//            level = 16384.0;
+            level = 0.1;
+            waveform = SINE;
+            duty = 0.5f;
+        }
+
+        // Start
+        protected void start()
+        {
+            thread = new Thread(this, "Audio");
+            thread.start();
+        }
+
+        // Stop
+        protected void stop()
+        {
+            Thread t = thread;
+            thread = null;
+
+            try
+            {
+                // Wait for the thread to exit
+                if (t != null && t.isAlive())
+                    t.join();
+            }
+
+            catch (Exception e) {}
+        }
+
+        public void run()
+        {
+            processAudio();
+        }
+
+        // Process audio
+        @SuppressWarnings("deprecation")
+        protected void processAudio()
+        {
+
+//   		AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC,
+//						8000, AudioFormat.CHANNEL_CONFIGURATION_MONO,
+//
+//			AudioFormat.ENCODING_PCM_16BIT, numSamples, AudioTrack.MODE_STATIC);
+            short buffer[];
+
+            int rate = 48000;
+//                AudioTrack.getNativeOutputSampleRate(AudioManager.STREAM_MUSIC);
+            int minSize =
+                    AudioTrack.getMinBufferSize(rate, AudioFormat.CHANNEL_OUT_MONO,
+                            AudioFormat.ENCODING_PCM_16BIT);
+
+            // Find a suitable buffer size
+            int sizes[] = {1024, 2048, 4096, 8192, 16384, 32768};
+            int size = 0;
+
+            for (int s : sizes)
+            {
+                if (s > minSize)
+                {
+                    size = s;
+                    break;
+                }
+            }
+
+            // Duration = size / rate
+            size = 48000;
+
+            final double K = 2.0 * Math.PI / rate;
+
+            // Create the audio track
+            audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, rate,
+                    AudioFormat.CHANNEL_OUT_MONO,
+                    AudioFormat.ENCODING_PCM_16BIT,
+                    size, AudioTrack.MODE_STREAM);
+            // Check audioTrack
+
+            // Check state
+            int state = audioTrack.getState();
+
+            if (state != AudioTrack.STATE_INITIALIZED)
+            {
+                audioTrack.release();
+                return;
+            }
+
+            audioTrack.play();
+
+            // Create the buffer
+            buffer = new short[size];
+
+            // Initialise the generator variables
+            double f = frequency;
+            double l = 0.0;
+            double q = 0.0;
+
+//            while (thread != null)
+//            {
+            double t = (duty * 2.0 * Math.PI) - Math.PI;
+
+            // Fill the current buffer
+            for (int i = 0; i < buffer.length; i++)
+            {
+                f += (frequency - f) / 4096.0;
+                l += ((mute ? 0.0 : level) * 16384.0 - l) / 4096.0;
+                q += ((q + (f * K)) < Math.PI) ? f * K :
+                        (f * K) - (2.0 * Math.PI);
+
+                switch (waveform)
+                {
+                    case SINE:
+                        buffer[i] = (short) Math.round(Math.sin(q) * l);
+                        break;
+
+                    case SQUARE:
+                        buffer[i] = (short) ((q > t) ? l : -l);
+                        break;
+
+                    case SAWTOOTH:
+                        buffer[i] = (short) Math.round((q / Math.PI) * l);
+                        break;
+                }
+            }
+
+            audioTrack.write(buffer, 0, buffer.length);
+//            }
+
+            audioTrack.stop();
+            audioTrack.release();
+
+            if (chirping)
+                handler.postDelayed(pfa, 1000);
         }
     }
 
