@@ -112,15 +112,25 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
         } else if (arg0.getId() == R.id.save_button) {
             int new_start = before_start_freq;
             int new_end = before_end_freq;
+            int new_duration = before_duration;
+            int new_interval = before_interval;
             String start_str = startFreqEditText.getText().toString();
             String end_str = endFreqEditText.getText().toString();
+            String duration_str = durationFreqEditText.getText().toString();
+            String interval_str = intervalFreqEditText.getText().toString();
             if (start_str != null)
                 new_start = Integer.parseInt(start_str);
             if (end_str != null)
                 new_end = Integer.parseInt(end_str);
+            if (duration_str != null)
+                new_duration = Integer.parseInt(duration_str);
+            if (interval_str != null)
+                new_interval = Integer.parseInt(interval_str);
 
             PreferenceManager.setInt(getActivity(), "start_freq", new_start);
             PreferenceManager.setInt(getActivity(), "end_freq", new_end);
+            PreferenceManager.setInt(getActivity(), "duration_freq", new_duration);
+            PreferenceManager.setInt(getActivity(), "interval_freq", new_interval);
             Toast.makeText(getActivity(), "save_button",
                     Toast.LENGTH_SHORT).show();
             closeFragment();
@@ -133,13 +143,18 @@ public class SettingsFragment extends Fragment implements View.OnClickListener {
 
         switch (arg0.getId()) {
             case R.id.start_frequency:
+                startFreqEditText.setText("");
                 startFreqEditText.getText().clear();
+                break;
             case R.id.end_frequency:
                 endFreqEditText.getText().clear();
+                break;
             case R.id.duration_frequency:
                 durationFreqEditText.getText().clear();
+                break;
             case R.id.interval_frequency:
                 intervalFreqEditText.getText().clear();
+                break;
             default:
                 break;
         }
