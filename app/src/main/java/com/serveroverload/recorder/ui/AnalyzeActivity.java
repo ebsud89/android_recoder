@@ -3,6 +3,7 @@ package com.serveroverload.recorder.ui;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
@@ -24,6 +25,7 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -135,6 +137,9 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     TextView timestamp_view;
     TableLayout detector_table;
 
+    int TABLE_ROW = 10;
+    int TABLE_COL = 10;
+
 
     //스레드 관련 부분 1
     // scaleThread scThr = new scaleThread();
@@ -197,6 +202,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         count_view = (TextView) findViewById(R.id.DetectorCount);
         timestamp_view = (TextView) findViewById(R.id.DetectorTimestamp);
         detector_table = (TableLayout) findViewById(R.id.DetectorTable);
+//        detector_table.removeAllViewsInLayout();
 
         detector.makeDetectorTable();
 
@@ -546,7 +552,12 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
 
         if (arg0.getId() == R.id.BackButton) {
-            AnalyzeActivity.this.finish();
+            //AnalyzeActivity.this.finish();
+
+//            Intent intentSubActivity =
+//                    new Intent(this, HomeActivity.class);
+            startActivity(new Intent(this, HomeActivity.class)
+                    .setAction(Intent.ACTION_MAIN) .addCategory(Intent.CATEGORY_LAUNCHER) .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
         }
         else if(arg0.getId() == R.id.AnalyzeButton) {
 
@@ -865,17 +876,58 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             // https://stackoverflow.com/questions/6513718/how-to-make-a-scrollable-tablelayout
 
             // https://4z7l.github.io/2020/09/17/android-context.html
-            TableRow row = new TableRow(getApplicationContext());
+            // https://1d1cblog.tistory.com/140
+//            TableRow row = new TableRow(getApplicationContext());
+//            row.setLayoutParams(new TableRow.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+//
+//            TextView tv1 = new TextView(getApplicationContext());
+//            tv1.setText("test 1");
+//            tv1.setTextColor(Color.parseColor("#33DA6D"));
+//            TextView tv2 = new TextView(getApplicationContext());
+//            tv2.setText("test 2");
+//            tv2.setTextColor(Color.parseColor("#33DA6D"));
+//            TextView tv3 = new TextView(getApplicationContext());
+//            tv3.setText("test 3");
+//            tv3.setTextColor(Color.parseColor("#33DA6D"));
+//            tv3.setWidth(getResources().getDimensionPixelSize(R.dimen.detector_element_width));
+//            tv3.setHeight(getResources().getDimensionPixelSize(R.dimen.detector_element_height));
+//            tv3.setSingleLine();
+//
+//            row.addView(tv1);
+//            row.addView(tv2);
+//            row.addView(tv3);
 
-            TextView tv1 = new TextView(getApplicationContext());
-            TextView tv2 = new TextView(getApplicationContext());
-            TextView tv3 = new TextView(getApplicationContext());
+            // TODO : 1) TextView 를 row_list 에 넣기
+            //        2) Table Header 를 scrollView 에서 분리
+            //        3) Grid Layout 크기 조절
+            ArrayList<ArrayList<TextView>> row_list = new ArrayList<ArrayList<TextView>>();
 
-            row.addView(tv1);
-            row.addView(tv2);
-            row.addView(tv3);
+            for (int i = 0 ; i < TABLE_COL; i++) {
 
-            detector_table.addView(row, new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
+                TableRow row = new TableRow(getApplicationContext());
+                TableRow.LayoutParams params = new TableRow.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.WRAP_CONTENT);
+                row.setLayoutParams(params);
+
+                for (int j = 0 ; j < TABLE_ROW; j++) {
+                    TextView tv = new TextView(getApplicationContext());
+                    tv.setHeight(getResources().getDimensionPixelSize(R.dimen.detector_element_height));
+                    tv.setWidth(getResources().getDimensionPixelSize(R.dimen.detector_element_width));
+                    tv.setBackgroundResource(R.color.tc_green_500);
+                    if (j>5){
+                        int res = getResources().getIdentifier("tc_green_300", "color", getPackageName());
+                        tv.setBackgroundResource(res);
+                    }
+                    ViewGroup.LayoutParams parm = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+                    params.setMargins(40,40,0,0);
+                    tv.setLayoutParams(params);
+                    row.addView(tv);
+                }
+
+                detector_table.addView(row);
+            }
+
+//            detector_table.addView(row, new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT));
+
         }
     }
 

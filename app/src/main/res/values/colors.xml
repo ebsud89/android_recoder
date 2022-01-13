@@ -1,26 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
+    <color name="purple_200">#cf92ee</color>
+    <color name="purple_500">#9d09dc</color>
+    <color name="purple_700">#720ecf</color>
     <color name="teal_200">#FF03DAC5</color>
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 
     <color name="opaque">#70000000</color>
-    <color name="bg_gradient_start">#00233f</color>
-    <color name="bg_gradient_end">#144a6c</color>
-    <color name="default_background">#6495ed</color>
+    <color name="bg_gradient_start">#0948dc</color>
+    <color name="bg_gradient_end">#0035c4</color>
+    <color name="default_background">#1344bd</color>
+    <color name="default_background2">#0040d1</color>
 
     <color name="text_green">#33DA6D</color>
     <color name="text_red">#DA334D</color>
 
     <!-- Color Preset : https://www.color-hex.com/color-palette/1006842 -->
-    <color name="color_blue_1">	#e1e5e8</color>
-    <color name="color_blue_2">	#2b89b0</color>
-    <color name="color_blue_3">	#144a6c</color>
-    <color name="color_blue_4">	#00233f</color>
-    <color name="color_blue_5">	#010e1b</color>
+    <color name="color_blue_1">	#b9dcff</color>
+    <color name="color_blue_2">	#8ac6ff</color>
+    <color name="color_blue_3">	#58b0ff</color>
+    <color name="color_blue_4">	#008eff</color>
+    <color name="color_blue_5">	#006edc</color>
 
+    <!-- TableLayout Color Set -->
+    <color name="tc_green_900">#008b00</color>
+    <color name="tc_green_800">#09af00</color>
+    <color name="tc_green_700">#41c300</color>
+    <color name="tc_green_600">#61d800</color>
+    <color name="tc_green_500">#75e900</color>
+    <color name="tc_green_400">#90ee02</color>
+    <color name="tc_green_300">#aaf255</color>
+    <color name="tc_green_200">#c6f68d</color>
+    <color name="tc_green_100">#defabb</color>
+
+    <color name="tc_red_900">#e54304</color>
+    <color name="tc_red_800">#ee6002</color>
+    <color name="tc_red_700">#f47100</color>
+    <color name="tc_red_600">#fa8100</color>
+    <color name="tc_red_500">#ff8d00</color>
+    <color name="tc_red_400">#ff9e22</color>
+    <color name="tc_red_300">#ffaf49</color>
+    <color name="tc_red_200">#ffc77d</color>
+    <color name="tc_red_100">#ffddb0</color>
 </resources>
