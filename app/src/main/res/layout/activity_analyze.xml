@@ -67,6 +67,15 @@
             android:textStyle="bold"
             android:text="OFF" />
 
+        <Button
+            android:id="@+id/SettingButton"
+            android:layout_width="wrap_content"
+            android:layout_height="48dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginLeft="20dp"
+            android:background="@color/color_blue_2"
+            android:textColor="@color/white"
+            android:text="Chirp" />
 
     </LinearLayout>
 
