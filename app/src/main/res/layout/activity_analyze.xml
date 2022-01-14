@@ -10,16 +10,16 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="48dp"
         android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
+        android:layout_marginLeft="4dp"
+        android:layout_gravity="center"
         android:orientation="horizontal">
 
         <ImageButton
             android:id="@+id/BackButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="16dp"
             android:background="@color/color_blue_2"
@@ -28,9 +28,8 @@
 
         <Button
             android:id="@+id/AnalyzeButton"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
+            android:layout_width="80dp"
+            android:layout_height="36dp"
             android:layout_marginRight="4dp"
             android:background="@color/color_blue_2"
             android:textColor="@color/white"
@@ -40,19 +39,19 @@
             android:id="@+id/AnalyzeText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:layout_marginLeft="8dp"
-            android:layout_marginRight="10dp"
+            android:layout_marginRight="4dp"
+            android:background="@drawable/table_border"
             android:textColor="@color/text_red"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:text="OFF" />
 
         <Button
             android:id="@+id/ChirpButton"
-            android:layout_width="wrap_content"
-            android:layout_height="48dp"
-            android:layout_marginTop="4dp"
-            android:layout_marginLeft="20dp"
+            android:layout_width="80dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="16dp"
             android:background="@color/color_blue_2"
             android:textColor="@color/white"
             android:text="Chirp" />
@@ -61,12 +60,21 @@
             android:id="@+id/ChirpText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
             android:layout_marginLeft="12dp"
+            android:background="@drawable/table_border"
             android:textColor="@color/text_red"
+            android:textSize="16sp"
             android:textStyle="bold"
             android:text="OFF" />
 
+        <ImageButton
+            android:id="@+id/SettingButton"
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:layout_marginLeft="14dp"
+            android:background="@color/color_blue_2"
+            android:src="@drawable/ic_action_settings"
+            />
 
     </LinearLayout>
 
@@ -74,9 +82,10 @@
     <TextView
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="20dp"
         android:textColor="@color/white"
+        android:textSize="14sp"
         android:text=" Detect Frequency (using FFT in Jtransform)" />
 
 
@@ -97,7 +106,7 @@
         android:id="@+id/chart"
         android:layout_width="match_parent"
         android:layout_height="280dp"
-        android:layout_marginTop="16dp">
+        android:layout_marginTop="12dp">
 
     </com.github.mikephil.charting.charts.BarChart>
 
@@ -105,8 +114,8 @@
         android:id="@+id/table_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:layout_marginLeft="4dp">
+        android:layout_marginTop="4dp"
+        android:layout_marginLeft="8dp">
 
         <TableRow
             android:layout_width="match_parent"
@@ -127,21 +136,6 @@
                 android:text="Vol. size"
                 android:textColor="@color/white"
                 android:layout_marginLeft="40dp"/>
-
-            <!--<TextView
-                android:id="@+id/textView2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="음계"
-                android:layout_marginLeft="10dp"/>
-
-            <TextView
-                     android:id="@+id/textView3"
-                     android:layout_width="wrap_content"
-                     android:layout_height="wrap_content"
-                     android:text="4번 음"
-                     android:layout_marginLeft="10dp"/>-->
-
 
         </TableRow>
 
@@ -165,21 +159,6 @@
                 android:textColor="@color/white"
                 android:layout_marginLeft="40dp"/>
 
-            <!--<TextView
-                android:id="@+id/HzText2"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="3번 음"
-                android:layout_marginLeft="10dp"/>
-
-            <TextView
-                 android:id="@+id/HzText3"
-                 android:layout_width="wrap_content"
-                 android:layout_height="wrap_content"
-                 android:text="4번 음"
-                 android:layout_marginLeft="10dp"/>-->
-
-
         </TableRow>
 
     </TableLayout>
@@ -187,12 +166,14 @@
     <LinearLayout
         android:id="@+id/DetectorView"
         android:layout_width="match_parent"
-        android:layout_height="320dp"
+        android:layout_height="340dp"
         android:layout_below="@+id/table_layout"
         android:layout_marginTop="12dp"
         android:layout_marginBottom="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginLeft="4dp"
+        android:paddingBottom="4dp"
+        android:paddingEnd="4dp"
         android:orientation="vertical"
         android:background="@android:color/background_dark" >
 
@@ -200,10 +181,10 @@
             android:id="@+id/DetectorHeader"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="6dp"
             android:layout_marginLeft="12dp"
             android:text="Frequency Detector View"
-            android:textSize="16dp"
+            android:textSize="18dp"
             android:textColor="@color/white"/>
 
         <LinearLayout
@@ -216,10 +197,21 @@
                 android:id="@+id/DetectorCount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginLeft="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="20dp"
                 android:layout_below="@+id/DetectorHeader"
                 android:text="COUNT"
+                android:textSize="12dp"
+                android:textColor="@color/white"/>
+
+            <TextView
+                android:id="@+id/DetectorCountText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="12dp"
+                android:layout_below="@+id/DetectorCount"
+                android:text="..."
                 android:textSize="12dp"
                 android:textColor="@color/white"/>
 
@@ -227,10 +219,21 @@
                 android:id="@+id/DetectorTimestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:layout_marginLeft="12dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="46dp"
                 android:layout_below="@+id/DetectorCount"
                 android:text="TIMESTAMP"
+                android:textSize="12dp"
+                android:textColor="@color/white"/>
+
+            <TextView
+                android:id="@+id/DetectorTimestampText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="12dp"
+                android:layout_below="@+id/DetectorCount"
+                android:text="..."
                 android:textSize="12dp"
                 android:textColor="@color/white"/>
         </LinearLayout>
@@ -240,42 +243,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:layout_marginLeft="4dp"
+            android:layout_marginLeft="2dp"
+            android:layout_marginBottom="4dp"
             android:layout_below="@+id/DetectorTimestamp"
             >
 
-            <TableRow
-                android:layout_width="match_parent"
-                android:layout_height="match_parent" >
-
-                <TextView
-                    android:layout_width="@dimen/detector_element_width"
-                    android:layout_height="@dimen/detector_element_height"
-                    android:text="1"
-                    android:textAlignment="center"
-                    android:textColor="@color/white"
-                    android:background="@color/color_blue_2"
-                    android:layout_marginLeft="10dp"/>
-
-                <TextView
-                    android:layout_width="@dimen/detector_element_width"
-                    android:layout_height="@dimen/detector_element_height"
-                    android:text="1"
-                    android:textAlignment="center"
-                    android:textColor="@color/white"
-                    android:background="@color/color_blue_2"
-                    android:layout_marginLeft="@dimen/detector_element_margin_left"/>
-
-                <TextView
-                    android:layout_width="@dimen/detector_element_width"
-                    android:layout_height="@dimen/detector_element_height"
-                    android:text="1"
-                    android:textAlignment="center"
-                    android:textColor="@color/white"
-                    android:background="@color/color_blue_2"
-                    android:layout_marginLeft="@dimen/detector_element_margin_left"/>
-
-            </TableRow>
         </TableLayout>
 
         <ScrollView
@@ -285,11 +257,11 @@
             >
             <!-- TODO : 10 by 10 테이블 -->
             <TableLayout
-                android:id="@+id/DetectorTable"
+                android:id="@+id/DetectorTableContent"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="2dp"
-                android:layout_marginLeft="4dp"
+                android:layout_marginLeft="2dp"
                 android:layout_below="@+id/DetectorTableHeader"
                 >
 

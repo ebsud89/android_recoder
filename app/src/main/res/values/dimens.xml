@@ -6,7 +6,11 @@
     <dimen name="fab_margin">16dp</dimen>
 
     <!-- DetectorView Constants -->
-    <dimen name="detector_element_height">24dp</dimen>
-    <dimen name="detector_element_width">24dp</dimen>
-    <dimen name="detector_element_margin_left">4dp</dimen>
+    <dimen name="detector_header_height">26dp</dimen>
+    <dimen name="detector_header_width">26dp</dimen>
+    <dimen name="detector_element_height">26dp</dimen>
+    <dimen name="detector_element_width">26dp</dimen>
+    <dimen name="detector_header_text_size">12sp</dimen>
+    <dimen name="detector_element_text_size">10sp</dimen>
+
 </resources>
