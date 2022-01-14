@@ -36,6 +36,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -56,7 +59,7 @@ import java.util.Iterator;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
 
-public class AnalyzeActivity extends Activity implements OnClickListener {
+public class AnalyzeActivity extends FragmentActivity implements OnClickListener {
 
     // Bitmap 이미지를 표시하기 위해 ImageView를 사용한다. 이 이미지는 현재 오디오 스트림에서 주파수들의 레벨을 나타낸다.
     // 이 레벨들을 그리려면 Bitmap에서 구성한 Canvas 객체와 Paint객체가 필요하다.
@@ -87,6 +90,8 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     Button chirpButton;
     TextView analyzeText;
     TextView chirpText;
+    ImageButton settingButton;
+    ImageButton refreshButton;
 
     boolean started = false;
     boolean chirping = false;
@@ -113,8 +118,11 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
     TableLayout detector_table_header;
     TableLayout detector_table_content;
     ArrayList<ArrayList<TextView>> tv_lists;
+    ArrayList<TextView> check_lists;
     ArrayList<Integer> green_list;
     ArrayList<Integer> red_list;
+    public ArrayList<Integer> check_point;
+
     int TABLE_ROW = 10;
     int TABLE_COL = 12;
     //스레드 관련 부분 1
@@ -159,6 +167,12 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
         chirpText = (TextView) findViewById(R.id.ChirpText);
 
+        settingButton = (ImageButton) findViewById(R.id.SettingButton);
+        settingButton.setOnClickListener(this);
+
+        refreshButton = (ImageButton) findViewById(R.id.RefreshButton);
+        refreshButton.setOnClickListener(this);
+
         // PreferenceManager
         START_FREQ = (double) PreferenceManager.getInt(this, "start_freq");
         END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
@@ -187,15 +201,15 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         // Detector View
         detector = new FrequencyDetector();
         tv_lists = new ArrayList<ArrayList<TextView>>();
+        check_lists = new ArrayList<TextView>();
 
         count_view = (TextView) findViewById(R.id.DetectorCount);
         timestamp_view = (TextView) findViewById(R.id.DetectorTimestamp);
         detector_table_header = (TableLayout) findViewById(R.id.DetectorTableHeader);
         detector_table_content = (TableLayout) findViewById(R.id.DetectorTableContent);
 
+        check_point = new ArrayList<Integer>();
         detector.init();
-//        detector.makeDetectorTableHeaderView();
-//        detector.makeDetectorTableContentView();
 
         chart = (BarChart) findViewById(R.id.chart);
         YAxis leftYAxis = chart.getAxisLeft();
@@ -243,7 +257,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
 
         // change MP chart ViewPort
 //        chart.moveViewToX(4048);
-        int center = (int) START_FREQ;
+        int center = (int) (START_FREQ + END_FREQ) / 2;
         chart.centerViewTo(center, 0, YAxis.AxisDependency.LEFT);
         chart.setScaleMinima(0f, 1.5f);
 
@@ -383,6 +397,19 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 pfa = new PlayFrequencyAudio();
                 handler.post(pfa);
             }
+        } else if (arg0.getId() == R.id.SettingButton) {
+            Toast.makeText(this.getApplicationContext(), "setting_button", Toast.LENGTH_SHORT).show();
+
+//            FragmentManager fragmentManager = getSupportFragmentManager();
+//            FragmentTransaction fragmentTransaction = fragmentManager
+//                    .beginTransaction();
+//            fragmentTransaction.replace(R.id.container,
+//                    new SettingsFragment());
+//            fragmentTransaction
+//                    .addToBackStack("SettingFragment");
+//            fragmentTransaction.commit();
+        } else if (arg0.getId() == R.id.RefreshButton) {
+            detector.refreshTableContent(this.getApplicationContext());
         }
     }
 
@@ -579,6 +606,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 }
             }
             detector.showAcumulativeCount();
+            detector.updateTableContent(getApplicationContext());
 
             Iterator iter = hzList.iterator();
             if (iter.hasNext() == true) {
@@ -603,7 +631,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             chart.setVisibleXRangeMaximum(6400);
             chart.moveViewToX(8);
 
-            int center = (int) START_FREQ;
+            int center = (int) (START_FREQ + END_FREQ) / 2;
             chart.centerViewTo(center, 0, YAxis.AxisDependency.LEFT);
             chart.setScaleMinima(0f, 1.5f);
 
@@ -732,6 +760,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             for (int i = 0; i < buffer.length; i++) {
 
                 frequency = START_FREQ + i * ((END_FREQ - START_FREQ) / size);
+
                 f += (frequency - f) / 4096.0;
                 l += ((mute ? 0.0 : level) * 16384.0 - l) / 4096.0;
                 q += ((q + (f * K)) < Math.PI) ? f * K : (f * K) - (2.0 * Math.PI);
@@ -756,11 +785,13 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         // 감지할 10~20 개 점 표현 및 활용
         public ArrayList<FrequencyData> data_list;
         public int data_list_size;
+        public int tmp_count;
         public String last_timestamp;
 
         public FrequencyDetector() {
             data_list = new ArrayList<FrequencyData>();
             data_list_size = 0;
+            tmp_count = 0;
         }
 
         public class FrequencyData {
@@ -775,6 +806,27 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 this.timestamp = timestamp;
                 this.seq = CHIRP_SEQ;
             }
+
+            public int getFrequency() {
+                return this.freq;
+            }
+
+            public double getSize() {
+                return this.size;
+            }
+
+            public String getTimestamp() {
+                return this.timestamp;
+            }
+
+            @Override
+            public boolean equals(Object o) {
+                if (o instanceof FrequencyData) {
+                    FrequencyData p = (FrequencyData) o;
+                    return (this.freq == p.freq);
+                } else
+                    return false;
+            }
         }
 //        ArrayList<Integer> hzList = new ArrayList<Integer>();
 //        ArrayList<Double> hzSize = new ArrayList<Double>();
@@ -782,7 +834,9 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         public void init() {
             this.makeDetectorTableHeaderView();
             this.makeDetectorTableContentView();
-//            this.makeColorlists();
+            this.makeColorlists();
+            this.makeCheckPointHz();
+            this.refreshTableContent(getApplicationContext());
         }
 
         public void addFrequencyData(Integer freq, Double size) {
@@ -797,14 +851,11 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         }
 
         public int getDataListSizeInRange() {
-            int count = 0;
 
             for (int i = 0; i < data_list.size(); i++) {
                 FrequencyData tmp = data_list.get(i);
                 if ((tmp.freq >= START_FREQ) && (tmp.freq <= END_FREQ)) {
                     if (tmp.size > 0) {
-                        // TODO : fix detected count
-                        count++;
                         data_list_size++;
                     }
                 }
@@ -817,6 +868,33 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
             int count = getDataListSizeInRange();
             count_view.setText("CHIRP : " + Integer.toString(CHIRP_SEQ - 1) + " / TOTAL : " + Integer.toString(count));
 //            timestamp_view.setText();
+        }
+
+        public void refreshTableContent(Context context) {
+
+            for (int i = 0; i < TABLE_ROW ; i++) {
+                int point = check_point.get(i);
+                TextView tv = check_lists.get(i);
+                String str = Integer.toString(point) + "hz";
+                tv.setText(str);
+//                check_point.add(point);
+                Toast.makeText(context, str, Toast.LENGTH_SHORT).show();
+            }
+        }
+
+        public void updateTableContent(Context context) {
+
+            for (int i = 0; i < TABLE_ROW ; i++) {
+                // search round
+                for (int j = 0; j < 1000 ; j++) {
+                    if (data_list.contains(check_point.get(i)+j)) {
+                        tmp_count++;
+                    }
+                }
+            }
+//            Toast.makeText(context, Integer.toString(data_list.get(0).getFrequency()), Toast.LENGTH_SHORT).show();
+//            Toast.makeText(context, Integer.toString(tmp_count), Toast.LENGTH_SHORT).show();
+            Log.d("Detector", "tmp_count " + Integer.toString(check_point.get(5)));
         }
 
         public void makeDetectorTableHeaderView() {
@@ -881,6 +959,7 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
                 pin_tv.setLayoutParams(params);
 
                 row.addView(pin_tv);
+                check_lists.add(pin_tv);
 
                 for (int j = 0; j < TABLE_COL; j++) {
                     TextView tv = new TextView(getApplicationContext());
@@ -903,13 +982,32 @@ public class AnalyzeActivity extends Activity implements OnClickListener {
         }
 
         public void makeColorlists() {
+            green_list = new ArrayList<Integer>();
+            red_list = new ArrayList<Integer>();
+
             for (int i = 1; i < 10; i++) {
                 Integer green_id = getResources().getIdentifier("tc_green_" + i + "00", "color", getPackageName());
                 Integer red_id = getResources().getIdentifier("tc_red_" + i + "00", "color", getPackageName());
                 green_list.add(green_id);
                 red_list.add(red_id);
             }
+        }
 
+        public void makeCheckPointHz () {
+            double frequency = START_FREQ;
+
+            for (int i = 0; i < 48000; i++) {
+
+                frequency = START_FREQ + i * ((END_FREQ - START_FREQ) / 48000);
+
+                for (int j = 0 ; j < TABLE_ROW ; j++) {
+                    if (frequency >= (START_FREQ + (j * (END_FREQ - START_FREQ) / TABLE_ROW))
+                            && frequency <= (START_FREQ + ((j + 1) * (END_FREQ - START_FREQ) / TABLE_ROW))) {
+                        check_point.add((int) frequency);
+                        break;
+                    }
+                }
+            }
         }
     }
 
