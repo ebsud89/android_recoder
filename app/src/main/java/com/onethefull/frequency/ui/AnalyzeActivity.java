@@ -48,11 +48,13 @@ import com.onethefull.frequency.util.PreferenceManager;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Random;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
 
@@ -88,6 +90,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     TextView analyzeText;
     TextView chirpText;
     ImageButton settingButton;
+    ImageButton testButton;
     ImageButton refreshButton;
 
     boolean started = false;
@@ -118,7 +121,12 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     ArrayList<TextView> check_lists;
     ArrayList<Integer> green_list;
     ArrayList<Integer> red_list;
-    public ArrayList<Integer> check_point;
+    ArrayList<Integer> check_point = new ArrayList<Integer>();
+    ArrayList<Integer> real_point = new ArrayList<Integer>();
+    boolean real_flag = true;
+    ArrayList<ArrayList<FrequencyData>> raw_list = new ArrayList<ArrayList<FrequencyData>>();
+    ArrayList<ArrayList<Double>> diff_lists = new ArrayList<ArrayList<Double>>();
+    int LASTEST_COL = 0;
 
     int TABLE_ROW = 10;
     int TABLE_COL = 12;
@@ -131,7 +139,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     private double END_FREQ = 0.0;
     private int DURATION_FREQ = 1;
     private int INTERVAL_FREQ = 3;
-    private int CHIRP_SEQ = 1;
+    private int CHIRP_SEQ = 0;
     private RealDoubleFFT transformer;
     private double sample[] = null;
     private byte[] generatedSnd = null;
@@ -140,6 +148,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     private AudioTrack audioTrack = null;
     // sig_gen
     private PlayFrequencyAudio pfa;
+    private AnalyzeFrequencyAudio afa;
     private Handler handler = new Handler();
 
     @Override
@@ -166,6 +175,9 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
         settingButton = (ImageButton) findViewById(R.id.SettingButton);
         settingButton.setOnClickListener(this);
+
+        testButton = (ImageButton) findViewById(R.id.TestButton);
+        testButton.setOnClickListener(this);
 
         refreshButton = (ImageButton) findViewById(R.id.RefreshButton);
         refreshButton.setOnClickListener(this);
@@ -392,6 +404,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 ////                playTask.execute();
 //                playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 pfa = new PlayFrequencyAudio();
+                afa = new AnalyzeFrequencyAudio();
                 handler.post(pfa);
             }
         } else if (arg0.getId() == R.id.SettingButton) {
@@ -406,7 +419,11 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 //                    .addToBackStack("SettingFragment");
 //            fragmentTransaction.commit();
         } else if (arg0.getId() == R.id.RefreshButton) {
-            detector.refreshTableContent(this.getApplicationContext());
+//            detector.refreshTableContent(this.getApplicationContext());
+            detector.refreshAllData();
+        } else if (arg0.getId() == R.id.TestButton) {
+            detector.updateCheckPoint();
+            Log.d("FrequencyData", String.valueOf(real_point.size()));
         }
     }
 
@@ -767,14 +784,55 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                 buffer[i] = (short) Math.round(Math.sin(q) * l);
             }
 
-            CHIRP_SEQ++;
+            CHIRP_SEQ += 1;
             audioTrack.write(buffer, 0, buffer.length);
 
             audioTrack.stop();
             audioTrack.release();
 
+            detector.updateRawList();
+
+            handler.postDelayed(afa, 1000 * DURATION_FREQ);
             // repeat
-            if (chirping) handler.postDelayed(pfa, 1000 * INTERVAL_FREQ);
+            if (chirping) {
+                handler.postDelayed(pfa, 1000 * INTERVAL_FREQ);
+            }
+
+        }
+    }
+
+    private class FrequencyData {
+        private int freq;
+        private double size;
+        private String timestamp;
+        private int seq;
+
+        public FrequencyData(int freq, double size, String timestamp) {
+            this.freq = freq;
+            this.size = size;
+            this.timestamp = timestamp;
+            this.seq = CHIRP_SEQ;
+        }
+
+        public int getFrequency() {
+            return this.freq;
+        }
+
+        public double getSize() {
+            return this.size;
+        }
+
+        public String getTimestamp() {
+            return this.timestamp;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof FrequencyData) {
+                FrequencyData p = (FrequencyData) o;
+                return (this.freq == p.freq);
+            } else
+                return false;
         }
     }
 
@@ -791,41 +849,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             data_list = new ArrayList<FrequencyData>();
             data_list_size = 0;
             tmp_count = 0;
-        }
-
-        public class FrequencyData {
-            private int freq;
-            private double size;
-            private String timestamp;
-            private int seq;
-
-            public FrequencyData(int freq, double size, String timestamp) {
-                this.freq = freq;
-                this.size = size;
-                this.timestamp = timestamp;
-                this.seq = CHIRP_SEQ;
-            }
-
-            public int getFrequency() {
-                return this.freq;
-            }
-
-            public double getSize() {
-                return this.size;
-            }
-
-            public String getTimestamp() {
-                return this.timestamp;
-            }
-
-            @Override
-            public boolean equals(Object o) {
-                if (o instanceof FrequencyData) {
-                    FrequencyData p = (FrequencyData) o;
-                    return (this.freq == p.freq);
-                } else
-                    return false;
-            }
         }
 //        ArrayList<Integer> hzList = new ArrayList<Integer>();
 //        ArrayList<Double> hzSize = new ArrayList<Double>();
@@ -846,11 +869,13 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
             FrequencyData temp = new FrequencyData(freq, size, timestamp);
 
-            if (freq > 14000) {
-                Log.d("FrequencyData", String.valueOf(freq));
-            }
+            if (freq > START_FREQ && freq < END_FREQ) {
+                if (CHIRP_SEQ > 0) {
+                    real_point.add(freq);
+                }
 
-            data_list.add(temp);
+                data_list.add(temp);
+            }
         }
 
         public int getDataListSizeInRange() {
@@ -863,7 +888,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                     }
                 }
             }
-
             return data_list_size;
         }
 
@@ -939,6 +963,14 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
         public void makeDetectorTableContentView() {
 
+
+            for (int i = 0; i < TABLE_COL; i++) {
+                ArrayList<TextView> tv_list = new ArrayList<TextView>();
+                tv_lists.add(tv_list);
+            }
+
+            ArrayList<ArrayList<TextView>> tmp_lists = new ArrayList<ArrayList<TextView>>();
+
             for (int i = 0; i < TABLE_ROW; i++) {
 
                 ArrayList<TextView> tv_list = new ArrayList<TextView>();
@@ -968,19 +1000,20 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                     TextView tv = new TextView(getApplicationContext());
                     tv.setHeight(getResources().getDimensionPixelSize(R.dimen.detector_element_height));
                     tv.setWidth(getResources().getDimensionPixelSize(R.dimen.detector_element_width));
-                    tv.setBackgroundResource(R.color.tc_green_500);
-                    if (j > 5) {
-                        int res = getResources().getIdentifier("tc_green_300", "color", getPackageName());
-                        tv.setBackgroundResource(res);
-                    }
-
+                    tv.setBackgroundResource(R.color.white);
                     tv.setLayoutParams(params);
                     row.addView(tv);
                     tv_list.add(tv);
                 }
-
+                tmp_lists.add(tv_list);
                 detector_table_content.addView(row);
-                tv_lists.add(tv_list);
+            }
+
+            // convert
+            for (int i = 0 ; i < TABLE_COL ; i++) {
+                for (int j = 0 ; j < TABLE_ROW ; j++) {
+                    tv_lists.get(i).add(tmp_lists.get(j).get(i));
+                }
             }
         }
 
@@ -1010,6 +1043,169 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                         break;
                     }
                 }
+            }
+        }
+
+        public void updateCheckPoint() {
+            int size = real_point.size();
+
+            for (int i = 1 ; i < 11 ; i++) {
+                int point = real_point.get(i * (size/10));
+                check_point.add(point);
+                if (real_point.contains(point)) {
+                    Log.d("FrequencyData", "OK : " + String.valueOf(point));
+                }
+            }
+        }
+
+        public void updateRawList() {
+            if(data_list.size() > 0) {
+                Log.d("AnalyzeFrequencyAudio", "FIRST : " + String.valueOf(data_list.get(0).getFrequency()));
+                raw_list.add(data_list);
+//                data_list.clear();
+                data_list = new ArrayList<FrequencyData>();
+            }
+        }
+
+        public void refreshAllData() {
+            raw_list.clear();
+            CHIRP_SEQ = 0;
+
+        }
+
+        public void updateTableColor() {
+            int latest_idx = diff_lists.size() - 1;
+
+            for (int i = LASTEST_COL ; i > -1 ; i--) {
+                for (int j = 0 ; j < TABLE_ROW ; j++) {
+                    tv_lists.get(i + 1).get(j).setBackground(tv_lists.get(i).get(j).getBackground());
+                }
+            }
+
+            Random rn = new Random();
+            for (int k = 0 ; k < TABLE_ROW ; k++) {
+//                int color_id = green_list.get(rn.nextInt(5));
+                int color_id = calculateColorId(diff_lists.get(latest_idx).get(k));
+                tv_lists.get(0).get(k).setBackgroundResource(color_id);
+            }
+
+            if (LASTEST_COL < TABLE_COL - 1)
+                LASTEST_COL += 1;
+        }
+
+        public int calculateColorId(double diff) {
+
+            int color_id = 0;
+            int converted_diff = (int) diff;
+
+            if (converted_diff > 0) {
+                // green
+                switch ((int)converted_diff / 10) {
+                    case 1:
+                        color_id = green_list.get(0);
+                        break;
+                    case 2:
+                        color_id = green_list.get(1);
+                        break;
+                    case 3:
+                        color_id = green_list.get(2);
+                        break;
+                    case 4:
+                        color_id = green_list.get(3);
+                        break;
+                    case 5:
+                        color_id = green_list.get(4);
+                        break;
+                    default:
+                        color_id = green_list.get(5);
+                }
+            } else {
+                // red
+                switch ((int) (-1) * converted_diff / 10) {
+                    case 1:
+                        color_id = red_list.get(0);
+                        break;
+                    case 2:
+                        color_id = red_list.get(1);
+                        break;
+                    case 3:
+                        color_id = red_list.get(2);
+                        break;
+                    case 4:
+                        color_id = red_list.get(3);
+                        break;
+                    case 5:
+                        color_id = red_list.get(4);
+                        break;
+                    default:
+                        color_id = red_list.get(5);
+                }
+            }
+
+            return color_id;
+        }
+    }
+
+    protected class AnalyzeFrequencyAudio implements Runnable {
+
+        @Override
+        public void run() {
+            int size = raw_list.size();
+
+            Log.d("AnalyzeFrequencyAudio", "SEQ : " + String.valueOf(CHIRP_SEQ) + " / size : " + String.valueOf(size));
+            if (size > 1) {
+                ArrayList<FrequencyData> before_list = raw_list.get(size-1);
+                ArrayList<FrequencyData> current_list = raw_list.get(size-2);
+                ArrayList<Integer> before_freqs = new ArrayList<Integer>();
+                ArrayList<Integer> current_freqs = new ArrayList<Integer>();
+                ArrayList<Integer> before_idxs = new ArrayList<Integer>();
+                ArrayList<Integer> current_idxs = new ArrayList<Integer>();
+                ArrayList<Double> diff_list = new ArrayList<Double>();
+
+                if (before_list.size() > 0 && current_list.size() > 0) {
+                    for (int i = 0; i < before_list.size(); i++) {
+                        before_freqs.add(before_list.get(i).getFrequency());
+                    }
+
+                    for (int i = 0; i < current_list.size(); i++) {
+                        current_freqs.add(current_list.get(i).getFrequency());
+                    }
+
+                    for (int i = 1; i < 11; i++) {
+
+                        int before_point = before_list.get(i * (before_list.size() / 10) - 1).getFrequency();
+                        int before_idx = before_freqs.indexOf(before_point);
+                        before_idxs.add(before_idx);
+
+                        int current_point = current_list.get(i * (current_list.size() / 10) - 1).getFrequency();
+                        int current_idx = current_freqs.indexOf(current_point);
+                        current_idxs.add(current_idx);
+
+                        Log.d("AnalyzeFrequencyAudio", "BE (idx) : " + String.valueOf(before_idx) + " / FE (idx) : " + String.valueOf(current_idx));
+                        Log.d("AnalyzeFrequencyAudio", "BE (freq) : " + String.valueOf(before_point) + " / FE (freq) : " + String.valueOf(current_point));
+                    }
+
+                    // update Detector Table
+                    for (int i = 0; i < 10; i++) {
+                        double diff;
+                        double before_hz = before_list.get(before_idxs.get(i)).getSize();
+                        double current_hz = current_list.get(current_idxs.get(i)).getSize();
+                        diff = current_hz - before_hz;
+                        diff_list.add(diff);
+                        Log.d("AnalyzeFrequencyAudio", "DIFF : " + diff);
+                    }
+
+                    diff_lists.add(diff_list);
+
+                    detector.updateTableColor();
+                }
+
+                // clear ArrayList
+                before_freqs.clear();
+                current_freqs.clear();
+                before_idxs.clear();
+                current_idxs.clear();
+                diff_list.clear();
             }
         }
     }

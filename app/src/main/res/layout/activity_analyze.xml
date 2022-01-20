@@ -199,11 +199,21 @@
                 android:textColor="@color/white"/>
 
             <ImageButton
+                android:id="@+id/TestButton"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
+                android:layout_marginTop="6dp"
+                android:layout_marginLeft="122dp"
+                android:background="@color/color_blue_3"
+                android:src="@drawable/baseline_restart_alt_24"
+                />
+
+            <ImageButton
                 android:id="@+id/RefreshButton"
                 android:layout_width="20dp"
                 android:layout_height="20dp"
                 android:layout_marginTop="6dp"
-                android:layout_marginLeft="152dp"
+                android:layout_marginLeft="12dp"
                 android:layout_marginRight="16dp"
                 android:background="@color/color_blue_2"
                 android:src="@drawable/baseline_restart_alt_24"
