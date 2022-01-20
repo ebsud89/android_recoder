@@ -757,9 +757,11 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             double t = (duty * 2.0 * Math.PI) - Math.PI;
 
             // Fill the current buffer
+            double refined_start_freq = START_FREQ - 700;
+            double refined_end_freq = END_FREQ + 2800;
             for (int i = 0; i < buffer.length; i++) {
 
-                frequency = START_FREQ + i * ((END_FREQ - START_FREQ) / size);
+                frequency = refined_start_freq + i * ((refined_end_freq - refined_start_freq) / size);
 
                 f += (frequency - f) / 4096.0;
                 l += ((mute ? 0.0 : level) * 16384.0 - l) / 4096.0;
@@ -846,6 +848,10 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             String timestamp = sdf.format(current);
 
             FrequencyData temp = new FrequencyData(freq, size, timestamp);
+
+            if (freq > 14000) {
+                Log.d("FrequencyData", String.valueOf(freq));
+            }
 
             data_list.add(temp);
         }
