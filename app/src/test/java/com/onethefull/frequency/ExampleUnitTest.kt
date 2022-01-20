@@ -1,4 +1,4 @@
-package com.serveroverload.recorder
+package com.onethefull.frequency
 
 import org.junit.Test
 

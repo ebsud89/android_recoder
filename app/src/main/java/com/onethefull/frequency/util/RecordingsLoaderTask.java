@@ -1,10 +1,9 @@
-package com.serveroverload.recorder.util;
+package com.onethefull.frequency.util;
 
 import java.util.ArrayList;
 
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.R.layout;
-import com.serveroverload.recorder.ui.HomeActivity;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.ui.HomeActivity;
 
 import android.content.Context;
 import android.os.AsyncTask;

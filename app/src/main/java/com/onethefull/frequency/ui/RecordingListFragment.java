@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.serveroverload.recorder.ui;
+package com.onethefull.frequency.ui;
 
 import java.io.IOException;
 
@@ -21,10 +21,10 @@ import android.widget.ListView;
 import androidx.fragment.app.Fragment;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.customview.PlayerVisualizerView;
-import com.serveroverload.recorder.util.Helper;
-import com.serveroverload.recorder.util.RecordingsLoaderTask;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.customview.PlayerVisualizerView;
+import com.onethefull.frequency.util.Helper;
+import com.onethefull.frequency.util.RecordingsLoaderTask;
 
 /**
  * @author Hitesh
@@ -37,7 +37,7 @@ public class RecordingListFragment extends Fragment implements
 	private SwipeRefreshLayout swipeLayout;
 	private ListView recordingsListView;
 	private LinearLayout mLinearLayout;
-	private com.serveroverload.recorder.customview.PlayerVisualizerView mVisualizerView;
+	private com.onethefull.frequency.customview.PlayerVisualizerView mVisualizerView;
 	private Visualizer mVisualizer;
 	private View rootView;
 	private boolean SONGPAUSED;

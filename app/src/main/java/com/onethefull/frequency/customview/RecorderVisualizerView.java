@@ -1,4 +1,4 @@
-package com.serveroverload.recorder.customview;
+package com.onethefull.frequency.customview;
 
 import java.util.ArrayList;
 import java.util.List;

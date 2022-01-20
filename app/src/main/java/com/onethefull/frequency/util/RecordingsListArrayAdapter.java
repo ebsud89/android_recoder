@@ -1,18 +1,14 @@
-package com.serveroverload.recorder.util;
+package com.onethefull.frequency.util;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.List;
 
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.R.id;
-import com.serveroverload.recorder.R.layout;
-import com.serveroverload.recorder.customview.SwipeLayout;
-import com.serveroverload.recorder.ui.HomeActivity;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.customview.SwipeLayout;
+import com.onethefull.frequency.ui.HomeActivity;
 
 import android.content.Context;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;

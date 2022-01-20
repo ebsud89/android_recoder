@@ -1,4 +1,4 @@
-package com.serveroverload.recorder.ui;
+package com.onethefull.frequency.ui;
 
 import android.os.Bundle;
 import android.util.Log;
@@ -9,13 +9,12 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.util.PreferenceManager;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.util.PreferenceManager;
 
 
 public class SettingsFragment extends Fragment implements View.OnClickListener {

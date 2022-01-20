@@ -1,11 +1,11 @@
-package com.serveroverload.recorder.customview;
+package com.onethefull.frequency.customview;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.serveroverload.recorder.R;
+import com.onethefull.frequency.R;
 
 import android.content.Context;
 import android.content.res.TypedArray;

@@ -1,4 +1,4 @@
-package com.serveroverload.recorder.ui;
+package com.onethefull.frequency.ui;
 
 import java.io.File;
 import java.io.IOException;
@@ -27,9 +27,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.customview.RecorderVisualizerView;
-import com.serveroverload.recorder.util.Helper;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.customview.RecorderVisualizerView;
+import com.onethefull.frequency.util.Helper;
 
 public class RecordAudioFragment extends Fragment {
 

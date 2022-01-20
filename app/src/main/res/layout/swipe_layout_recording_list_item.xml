@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical" >
 
-    <com.serveroverload.recorder.customview.SwipeLayout
+    <com.onethefull.frequency.customview.SwipeLayout
         xmlns:android="http://schemas.android.com/apk/res/android"
         android:id="@+id/swipe_layout_1"
         android:layout_width="match_parent"
@@ -96,6 +96,6 @@
                 android:textSize="20sp" />
         </LinearLayout>
         <!-- Surface View End -->
-    </com.serveroverload.recorder.customview.SwipeLayout>
+    </com.onethefull.frequency.customview.SwipeLayout>
 
 </LinearLayout>

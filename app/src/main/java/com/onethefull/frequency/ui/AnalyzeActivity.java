@@ -1,9 +1,8 @@
-package com.serveroverload.recorder.ui;
+package com.onethefull.frequency.ui;
 
 import static android.media.AudioTrack.getMinBufferSize;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -37,8 +36,6 @@ import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
-import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.github.mikephil.charting.charts.BarChart;
 import com.github.mikephil.charting.components.XAxis;
@@ -46,8 +43,8 @@ import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.util.PreferenceManager;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.util.PreferenceManager;
 
 import org.jtransforms.fft.DoubleFFT_1D;
 

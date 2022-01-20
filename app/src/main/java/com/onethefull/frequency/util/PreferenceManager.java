@@ -1,4 +1,4 @@
-package com.serveroverload.recorder.util;
+package com.onethefull.frequency.util;
 
 import android.content.Context;
 

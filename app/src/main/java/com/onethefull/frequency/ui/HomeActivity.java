@@ -1,4 +1,4 @@
-package com.serveroverload.recorder.ui;
+package com.onethefull.frequency.ui;
 
 import java.util.ArrayList;
 
@@ -7,8 +7,8 @@ import android.os.Bundle;
 import androidx.fragment.app.FragmentActivity;
 import androidx.fragment.app.FragmentTransaction;
 
-import com.serveroverload.recorder.R;
-import com.serveroverload.recorder.util.PreferenceManager;
+import com.onethefull.frequency.R;
+import com.onethefull.frequency.util.PreferenceManager;
 
 public class HomeActivity extends FragmentActivity {
 
