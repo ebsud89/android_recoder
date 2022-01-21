@@ -893,7 +893,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
         public void showAcumulativeCount() {
             int count = getDataListSizeInRange();
-            count_view.setText("CHIRP : " + Integer.toString(CHIRP_SEQ - 1) + " / TOTAL : " + Integer.toString(count));
+            count_view.setText("CHIRP : " + Integer.toString(CHIRP_SEQ) + " / TOTAL : " + Integer.toString(count));
 //            timestamp_view.setText();
         }
 
@@ -1071,6 +1071,12 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             raw_list.clear();
             CHIRP_SEQ = 0;
 
+            for (int i = 0; i < TABLE_COL; i++) {
+                ArrayList<TextView> tv_list = tv_lists.get(i);
+                for (int j = 0; j < TABLE_ROW; j++) {
+                    tv_list.get(j).setBackgroundResource(R.color.white);
+                }
+            }
         }
 
         public void updateTableColor() {
@@ -1078,7 +1084,11 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
             for (int i = LASTEST_COL ; i > -1 ; i--) {
                 for (int j = 0 ; j < TABLE_ROW ; j++) {
-                    tv_lists.get(i + 1).get(j).setBackground(tv_lists.get(i).get(j).getBackground());
+                    try {
+                        tv_lists.get(i + 1).get(j).setBackground(tv_lists.get(i).get(j).getBackground());
+                    } catch (Exception e) {
+
+                    }
                 }
             }
 
@@ -1098,49 +1108,88 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             int color_id = 0;
             int converted_diff = (int) diff;
 
-            if (converted_diff > 0) {
+            if (converted_diff < 0)
+                converted_diff *= -1;
+
+//            if (converted_diff > 0) {
                 // green
-                switch ((int)converted_diff / 10) {
+                switch ((int)converted_diff / 18) {
                     case 1:
-                        color_id = green_list.get(0);
+                        color_id = green_list.get(8);
                         break;
                     case 2:
-                        color_id = green_list.get(1);
+                        color_id = green_list.get(7);
                         break;
                     case 3:
-                        color_id = green_list.get(2);
+                        color_id = green_list.get(6);
                         break;
                     case 4:
-                        color_id = green_list.get(3);
+                        color_id = green_list.get(5);
                         break;
                     case 5:
                         color_id = green_list.get(4);
                         break;
-                    default:
-                        color_id = green_list.get(5);
-                }
-            } else {
-                // red
-                switch ((int) (-1) * converted_diff / 10) {
-                    case 1:
+                    case 6:
+                        color_id = green_list.get(3);
+                        break;
+                    case 7:
+                        color_id = green_list.get(2);
+                        break;
+                    case 8:
+                        color_id = green_list.get(1);
+                        break;
+                    case 9:
+                        color_id = green_list.get(0);
+                        break;
+                    case 10:
                         color_id = red_list.get(0);
                         break;
-                    case 2:
+                    case 11:
                         color_id = red_list.get(1);
                         break;
-                    case 3:
+                    case 12:
                         color_id = red_list.get(2);
                         break;
-                    case 4:
+                    case 13:
                         color_id = red_list.get(3);
                         break;
-                    case 5:
+                    case 14:
                         color_id = red_list.get(4);
                         break;
-                    default:
+                    case 15:
                         color_id = red_list.get(5);
+                        break;
+                    case 16:
+                        color_id = red_list.get(6);
+                        break;
+                    case 17:
+                        color_id = red_list.get(7);
+                        break;
+                    default:
+                        color_id = red_list.get(8);
                 }
-            }
+//            } else {
+//                // red
+//                switch ((int) (-1) * converted_diff / 10) {
+//                    case 1:
+//                        color_id = red_list.get(0);
+//                        break;
+//                    case 2:
+//                        color_id = red_list.get(1);
+//                        break;
+//                    case 3:
+//                        color_id = red_list.get(2);
+//                        break;
+//                    case 4:
+//                        color_id = red_list.get(3);
+//                        break;
+//                    case 5:
+//                        color_id = red_list.get(4);
+//                        break;
+//                    default:
+//                        color_id = red_list.get(5);
+//                }
+//            }
 
             return color_id;
         }
