@@ -950,7 +950,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                 tv.setHeight(getResources().getDimensionPixelSize(R.dimen.detector_header_height));
                 tv.setWidth(getResources().getDimensionPixelSize(R.dimen.detector_header_width));
                 tv.setBackgroundResource(R.color.color_blue_2);
-                tv.setText(Integer.toString((i + 1) * 5) + "s");
+                tv.setText(Integer.toString((i + 1) * (DURATION_FREQ + INTERVAL_FREQ)) + "s");
                 tv.setTextSize(TypedValue.COMPLEX_UNIT_PX, getResources().getDimensionPixelSize(R.dimen.detector_header_text_size));
                 tv.setTextColor(Color.WHITE);
                 tv.setGravity(Gravity.CENTER);
@@ -1030,6 +1030,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
         }
 
         public void makeCheckPointHz () {
+            // TODO : 실제 Chirp 음 범위 기준으로 업데이트 필요
             double frequency = START_FREQ;
 
             for (int i = 0; i < 48000; i++) {

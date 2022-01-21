@@ -205,7 +205,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginLeft="122dp"
                 android:background="@color/color_blue_3"
-                android:src="@drawable/baseline_restart_alt_24"
+                android:src="@drawable/baseline_low_priority_white_24"
                 />
 
             <ImageButton
@@ -215,8 +215,8 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginLeft="12dp"
                 android:layout_marginRight="16dp"
-                android:background="@color/color_blue_2"
-                android:src="@drawable/baseline_restart_alt_24"
+                android:background="@color/color_blue_4"
+                android:src="@drawable/baseline_autorenew_white_24"
                 />
 
         </LinearLayout>
