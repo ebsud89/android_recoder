@@ -44,8 +44,13 @@ import com.github.mikephil.charting.data.BarData;
 import com.github.mikephil.charting.data.BarDataSet;
 import com.github.mikephil.charting.data.BarEntry;
 import com.onethefull.frequency.R;
+import com.onethefull.frequency.api.ApiHelper;
+import com.onethefull.frequency.data.FrequencyDataList;
+import com.onethefull.frequency.data.FrequencyData;
 import com.onethefull.frequency.util.PreferenceManager;
+import com.onethefull.frequency.api.ApiService;
 
+import org.apache.commons.math3.stat.Frequency;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import java.sql.Array;
@@ -54,6 +59,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Random;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
@@ -124,7 +130,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     ArrayList<Integer> check_point = new ArrayList<Integer>();
     ArrayList<Integer> real_point = new ArrayList<Integer>();
     boolean real_flag = true;
-    ArrayList<ArrayList<FrequencyData>> raw_list = new ArrayList<ArrayList<FrequencyData>>();
+    ArrayList<ArrayList<FrequencyDataa>> raw_list = new ArrayList<ArrayList<FrequencyDataa>>();
     ArrayList<ArrayList<Double>> diff_lists = new ArrayList<ArrayList<Double>>();
     int LASTEST_COL = 0;
 
@@ -422,8 +428,15 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 //            detector.refreshTableContent(this.getApplicationContext());
             detector.refreshAllData();
         } else if (arg0.getId() == R.id.TestButton) {
-            detector.updateCheckPoint();
-            Log.d("FrequencyData", String.valueOf(real_point.size()));
+//            detector.updateCheckPoint();
+//            Log.d("FrequencyData", String.valueOf(real_point.size()));
+            FrequencyDataList tmp = new FrequencyDataList();
+            FrequencyData data = new FrequencyData();
+            ArrayList<FrequencyData> list = new ArrayList<FrequencyData>();
+            list.add(data);
+            tmp.setFrequencyList(list);
+            ApiHelper helper = ApiHelper.Companion.getInstance();
+            helper.provideApiService.sendJsonData(tmp);
         }
     }
 
@@ -801,13 +814,13 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
         }
     }
 
-    private class FrequencyData {
+    private class FrequencyDataa {
         private int freq;
         private double size;
         private String timestamp;
         private int seq;
 
-        public FrequencyData(int freq, double size, String timestamp) {
+        public FrequencyDataa(int freq, double size, String timestamp) {
             this.freq = freq;
             this.size = size;
             this.timestamp = timestamp;
@@ -828,8 +841,8 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
         @Override
         public boolean equals(Object o) {
-            if (o instanceof FrequencyData) {
-                FrequencyData p = (FrequencyData) o;
+            if (o instanceof FrequencyDataa) {
+                FrequencyDataa p = (FrequencyDataa) o;
                 return (this.freq == p.freq);
             } else
                 return false;
@@ -840,13 +853,13 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
         // TODO
         // 감지할 10~20 개 점 표현 및 활용
-        public ArrayList<FrequencyData> data_list;
+        public ArrayList<FrequencyDataa> data_list;
         public int data_list_size;
         public int tmp_count;
         public String last_timestamp;
 
         public FrequencyDetector() {
-            data_list = new ArrayList<FrequencyData>();
+            data_list = new ArrayList<FrequencyDataa>();
             data_list_size = 0;
             tmp_count = 0;
         }
@@ -867,7 +880,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
             String timestamp = sdf.format(current);
 
-            FrequencyData temp = new FrequencyData(freq, size, timestamp);
+            FrequencyDataa temp = new FrequencyDataa(freq, size, timestamp);
 
             if (freq > START_FREQ && freq < END_FREQ) {
                 if (CHIRP_SEQ > 0) {
@@ -881,7 +894,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
         public int getDataListSizeInRange() {
 
             for (int i = 0; i < data_list.size(); i++) {
-                FrequencyData tmp = data_list.get(i);
+                FrequencyDataa tmp = data_list.get(i);
                 if ((tmp.freq >= START_FREQ) && (tmp.freq <= END_FREQ)) {
                     if (tmp.size > 0) {
                         data_list_size++;
@@ -1064,7 +1077,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                 Log.d("AnalyzeFrequencyAudio", "FIRST : " + String.valueOf(data_list.get(0).getFrequency()));
                 raw_list.add(data_list);
 //                data_list.clear();
-                data_list = new ArrayList<FrequencyData>();
+                data_list = new ArrayList<FrequencyDataa>();
             }
         }
 
@@ -1204,8 +1217,8 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
 
             Log.d("AnalyzeFrequencyAudio", "SEQ : " + String.valueOf(CHIRP_SEQ) + " / size : " + String.valueOf(size));
             if (size > 1) {
-                ArrayList<FrequencyData> before_list = raw_list.get(size-1);
-                ArrayList<FrequencyData> current_list = raw_list.get(size-2);
+                ArrayList<FrequencyDataa> before_list = raw_list.get(size-1);
+                ArrayList<FrequencyDataa> current_list = raw_list.get(size-2);
                 ArrayList<Integer> before_freqs = new ArrayList<Integer>();
                 ArrayList<Integer> current_freqs = new ArrayList<Integer>();
                 ArrayList<Integer> before_idxs = new ArrayList<Integer>();

@@ -2,7 +2,7 @@ package com.onethefull.frequency.data
 
 import com.google.gson.annotations.SerializedName
 
-data class FrequncyData (
+data class FrequencyData (
     @SerializedName("freqHz")
     var freqHz: Int? = 0,
     @SerializedName("freqSize")

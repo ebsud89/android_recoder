@@ -39,7 +39,7 @@ class ApiHelper: ApiBase() {
         return interceptor
     }
 
-    val provideApiService = Retrofit.Builder()
+    @JvmField val provideApiService = Retrofit.Builder()
         .baseUrl(DB_ADDRESS)
         // 네트워크 요청 로그를 표시해 줍니다.
         .client(provideOkHttpClient(provideLoggingInterceptor()))
