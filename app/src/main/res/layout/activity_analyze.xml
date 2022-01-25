@@ -205,6 +205,7 @@
                 android:layout_marginTop="6dp"
                 android:layout_marginLeft="122dp"
                 android:background="@color/color_blue_3"
+                android:color="@color/tc_green_300"
                 android:src="@drawable/baseline_low_priority_white_24"
                 />
 

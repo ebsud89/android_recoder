@@ -434,7 +434,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             FrequencyData data = new FrequencyData();
             ArrayList<FrequencyData> list = new ArrayList<FrequencyData>();
             list.add(data);
-            tmp.setFrequencyList(list);
+            tmp.setFreqList(list);
             ApiHelper helper = ApiHelper.Companion.getInstance();
             helper.provideApiService.sendJsonData(tmp);
         }
