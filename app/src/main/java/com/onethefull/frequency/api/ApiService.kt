@@ -8,7 +8,7 @@ import retrofit2.http.Body
 
 interface ApiService {
 
-    @POST("http://trackingeducollectflask.ktpaasta-v4.kr/collector/insert")
+    @POST("http://59.29.245.152:8989/collector/insert/")
     fun sendJsonData(@Body body: FrequencyDataList): Observable<Response<Void>>
 
     // TODO: start, stop 전송 URL 정해지면 입력

@@ -20,6 +20,8 @@ import android.media.audiofx.NoiseSuppressor;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.util.TypedValue;
 import android.view.Gravity;
@@ -430,8 +432,15 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
         } else if (arg0.getId() == R.id.TestButton) {
 //            detector.updateCheckPoint();
 //            Log.d("FrequencyData", String.valueOf(real_point.size()));
+
+            Vibrator vibrator = (Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+            vibrator.vibrate(VibrationEffect.createOneShot(500, 100));
+
             FrequencyDataList tmp = new FrequencyDataList();
             FrequencyData data = new FrequencyData();
+            data.setFreqHz(100);
+            data.setFreqSize(100.0);
+            data.setSeqNum(1);
             ArrayList<FrequencyData> list = new ArrayList<FrequencyData>();
             list.add(data);
             tmp.setFreqList(list);
