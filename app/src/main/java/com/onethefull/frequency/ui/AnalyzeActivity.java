@@ -178,7 +178,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
         END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
         DURATION_FREQ = PreferenceManager.getInt(this, "duration_freq");
         INTERVAL_FREQ = PreferenceManager.getInt(this, "interval_freq");
-        
+
         // RealDoubleFFT 클래스 컨스트럭터는 한번에 처리할 샘플들의 수를 받는다. 그리고 출력될 주파수 범위들의 수를 나타낸다.
         transformer = new RealDoubleFFT(blockSize);
 
@@ -362,6 +362,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             list.add(data);
             tmp.setFreqList(list);
             ApiHelper helper = ApiHelper.Companion.getInstance();
+            // TODO : API response 코드 보고 싶다
             helper.provideApiService.sendJsonData(tmp);
         }
     }
