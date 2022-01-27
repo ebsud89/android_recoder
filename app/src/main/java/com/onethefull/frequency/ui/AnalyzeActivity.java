@@ -33,6 +33,7 @@ import android.widget.TableRow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.FragmentActivity;
 
@@ -57,6 +58,12 @@ import java.util.Iterator;
 import java.util.Random;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
+import io.reactivex.Observable;
+import io.reactivex.Observer;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+import retrofit2.Response;
 
 public class AnalyzeActivity extends FragmentActivity implements OnClickListener {
 
@@ -362,8 +369,29 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             list.add(data);
             tmp.setFreqList(list);
             ApiHelper helper = ApiHelper.Companion.getInstance();
-            // TODO : API response 코드 보고 싶다
-            helper.provideApiService.sendJsonData(tmp);
+
+            // API response 코드 보고 싶다 : ㅇㅋ 해결했슴돠
+            Observable<Response<Void>> observable = helper.provideApiService.sendJsonData(tmp)
+                    .subscribeOn(Schedulers.computation()).observeOn(AndroidSchedulers.mainThread());
+            observable.subscribe(new Observer<Response<Void>>() {
+                @Override
+                public void onSubscribe(@NonNull Disposable d) {
+                }
+
+                @Override
+                public void onNext(@NonNull Response<Void> voidResponse) {
+                    // TODO: 여기에 정의하시면 됩니다!
+                    Log.d("TEST", "TEST");
+                }
+
+                @Override
+                public void onError(@NonNull Throwable e) {
+                }
+
+                @Override
+                public void onComplete() {
+                }
+            });
         }
     }
 
