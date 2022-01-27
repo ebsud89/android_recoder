@@ -1,7 +1,5 @@
 package com.onethefull.frequency.ui;
 
-import static android.media.AudioTrack.getMinBufferSize;
-
 import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
@@ -10,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.media.AudioAttributes;
 import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioRecord;
@@ -50,18 +47,13 @@ import com.onethefull.frequency.api.ApiHelper;
 import com.onethefull.frequency.data.FrequencyDataList;
 import com.onethefull.frequency.data.FrequencyData;
 import com.onethefull.frequency.util.PreferenceManager;
-import com.onethefull.frequency.api.ApiService;
 
-import org.apache.commons.math3.stat.Frequency;
 import org.jtransforms.fft.DoubleFFT_1D;
 
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Random;
 
 import ca.uol.aig.fftpack.RealDoubleFFT;
@@ -75,8 +67,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     private final int duration = 1; // seconds
     private final int sampleRate = 8000;
     private final int numSamples = duration * sampleRate;
-    private final double freqOfTone = 6000; // hz
-    private final byte pcm[] = new byte[2 * numSamples];
     //    int frequency = 8192; //주파수가 8192일 경우 4096 까지 측정이 가능함
     int frequency = 48000;
     int channelConfiguration = AudioFormat.CHANNEL_IN_MONO;
@@ -86,8 +76,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     //배열이 40일때 hz는 80헤르츠를 가지고있다는것.
     int blockSize = 24000;
     DoubleFFT_1D fft = new DoubleFFT_1D(blockSize); //JTransform 라이브러리로 FFT 수행
-
-    String scale2;
     //frequency -> 측정 주파수 대역으로 퓨리에 변환 시 f/2 만큼의 크기의 주파수를 분석 할 수 있음.
     //blockSize -> 한 분기마다 측정하는 사이즈로 double 배열로 저장 시 , b/2 개의 배열이 나옴. f/b -> 배열 하나에 할당되는 주파수 범위로
     // 8192/2048 -> 4Hz임
@@ -105,8 +93,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     boolean chirping = false;
     // RecordAudio는 여기에서 정의되는 내부 클래스로서 AsyncTask를 확장한다.
     RecordAudio recordTask;
-    // PlayAudio는 여기에서 정의되는 내부 클래스로서 AsyncTask를 확장한다.
-    PlayAudio playTask;
     ImageView imageView;
     Bitmap bitmap;
     Canvas canvas;
@@ -149,10 +135,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     private int INTERVAL_FREQ = 3;
     private int CHIRP_SEQ = 0;
     private RealDoubleFFT transformer;
-    private double sample[] = null;
-    private byte[] generatedSnd = null;
     // play PCM sound (makeTone)
-    private int sample_size = numSamples;
     private AudioTrack audioTrack = null;
     // sig_gen
     private PlayFrequencyAudio pfa;
@@ -195,10 +178,7 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
         END_FREQ = (double) PreferenceManager.getInt(this, "end_freq");
         DURATION_FREQ = PreferenceManager.getInt(this, "duration_freq");
         INTERVAL_FREQ = PreferenceManager.getInt(this, "interval_freq");
-
-        sample = new double[numSamples * DURATION_FREQ];
-        generatedSnd = new byte[2 * numSamples * DURATION_FREQ];
-
+        
         // RealDoubleFFT 클래스 컨스트럭터는 한번에 처리할 샘플들의 수를 받는다. 그리고 출력될 주파수 범위들의 수를 나타낸다.
         transformer = new RealDoubleFFT(blockSize);
 
@@ -307,61 +287,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
     // AsyncTask를 사용하면 사용자 인터페이스를 멍하니 있게 하는 메소드들을 별도의 스레드로 실행한다.
     // doInBackground 메소드에 둘 수 있는 것이면 뭐든지 이런 식으로 실행할 수 있다.
 
-    public String whichScale2(double[]... toTransform) {
-
-        if (toTransform[0][111] > 99999) {
-
-        } else if (toTransform[0][259] > 55 || toTransform[0][260] > 55 || toTransform[0][261] > 55) {
-            scale2 = "C4"; //도
-        } else if (toTransform[0][293] > 15 || toTransform[0][292] > 30 || toTransform[0][294] > 20 || toTransform[0][295] > 30 || toTransform[0][296] > 30) {
-            scale2 = "D4"; //레
-        } else if (toTransform[0][329] > 50 || toTransform[0][328] > 50 || toTransform[0][330] > 50) {
-            scale2 = "E4"; //미
-        } else if (toTransform[0][349] > 50 || toTransform[0][348] > 50 || toTransform[0][347] > 50 || toTransform[0][346] > 50 || toTransform[0][350] > 50 || toTransform[0][351] > 50) {
-            scale2 = "F4"; //파
-        } else if (toTransform[0][391] > 55 || toTransform[0][390] > 60 || toTransform[0][389] > 60 || toTransform[0][392] > 60) {
-            scale2 = "G4"; //솔
-        } else if (toTransform[0][440] > 30 || toTransform[0][441] > 30 || toTransform[0][442] > 55 || toTransform[0][438] > 30 || toTransform[0][436] > 55 || toTransform[0][437] > 55) {
-            scale2 = "A4"; //라
-        } else if (toTransform[0][493] > 80 || toTransform[0][494] > 80 || toTransform[0][495] > 80 || toTransform[0][496] > 80) {
-            scale2 = "B4"; //솔
-        } else if (toTransform[0][523] > 44 || toTransform[0][524] > 44 || toTransform[0][521] > 44) {
-            scale2 = "C5";
-        } else if (toTransform[0][587] > 44 || toTransform[0][588] > 44 || toTransform[0][589] > 44) {
-            scale2 = "D5";
-        } else if (toTransform[0][660] > 15 || toTransform[0][659] > 20 || toTransform[0][662] > 20 || toTransform[0][663] > 20 || toTransform[0][658] > 15 || toTransform[0][657] > 28) {
-            scale2 = "E5";
-        } else if (toTransform[0][697] > 60 || toTransform[0][698] > 60 || toTransform[0][699] > 60 || toTransform[0][700] > 60) {
-            scale2 = "F5";
-        } else if (toTransform[0][783] > 55 || toTransform[0][784] > 55) {
-            scale2 = "G5";
-        } else if (toTransform[0][880] > 60 || toTransform[0][881] > 60 || toTransform[0][882] > 60) {
-            scale2 = "A5";
-        } else if (toTransform[0][987] > 33 || toTransform[0][988] > 33 || toTransform[0][989] > 33) {
-            scale2 = "B5";
-        }
-        //3옥타브
-        else if (toTransform[0][129] > 18 || toTransform[0][130] > 18) {
-            scale2 = "C3";
-        } else if (toTransform[0][145] > 18 || toTransform[0][144] > 18 || toTransform[0][146] > 18) {
-            scale2 = "D3";
-        } else if (toTransform[0][164] > 18 || toTransform[0][163] > 18 || toTransform[0][165] > 18) {
-            scale2 = "E3";
-        } else if (toTransform[0][174] > 18 || toTransform[0][173] > 18 || toTransform[0][175] > 18) {
-            scale2 = "F3";
-        } else if (toTransform[0][195] > 18 || toTransform[0][196] > 18 || toTransform[0][194] > 18) {
-            scale2 = "G3";
-        } else if (toTransform[0][220] > 18 || toTransform[0][221] > 18 || toTransform[0][119] > 18) {
-            scale2 = "A3";
-        } else if (toTransform[0][246] > 18 || toTransform[0][245] > 18 || toTransform[0][247] > 18) {
-            scale2 = "B3";
-        } else {
-
-        }
-
-        return scale2;
-    }
-
     @Override
     public void onClick(View arg0) {
 
@@ -388,7 +313,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                 analyzeText.setText("ON");
                 analyzeText.setTextColor(Color.parseColor("#33DA6D"));
                 recordTask = new RecordAudio();
-//                recordTask.execute();
                 recordTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
             }
         } else if (arg0.getId() == R.id.ChirpButton) {
@@ -399,18 +323,11 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                 chirping = false;
                 chirpText.setText("OFF");
                 chirpText.setTextColor(Color.parseColor("#DA334D"));
-//                clearTone();
-//                playTask.cancel(true);
                 handler.removeCallbacks(pfa);
             } else {
                 chirping = true;
                 chirpText.setText("ON");
                 chirpText.setTextColor(Color.parseColor("#33DA6D"));
-//                genTone();
-//                makeTone();
-//                playTask = new PlayAudio();
-////                playTask.execute();
-//                playTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
                 pfa = new PlayFrequencyAudio();
                 afa = new AnalyzeFrequencyAudio();
                 handler.post(pfa);
@@ -446,86 +363,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             tmp.setFreqList(list);
             ApiHelper helper = ApiHelper.Companion.getInstance();
             helper.provideApiService.sendJsonData(tmp);
-        }
-    }
-
-    public void genTone() {
-        // numSamples = duration * sampleRate;
-        // numSamples = 8000
-
-        // make frequency array
-        double[] freqOfToneArr = new double[numSamples * DURATION_FREQ];
-        double freqOfTones = START_FREQ;
-        double sigma = 0.8;
-
-        for (int i = 0; i < numSamples * DURATION_FREQ; i++) {
-            freqOfToneArr[i] = freqOfTones++;
-//            freqOfToneArr[i] = freqOfTones;
-//            freqOfToneArr[i] = freqOfTones - (i*(END_FREQ - START_FREQ))/
-//            (numSamples*DURATION_FREQ);
-        }
-
-
-        // fill out the array
-        for (int i = 0; i < numSamples * DURATION_FREQ; ++i) {
-//            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate) * freqOfToneArr[i]);
-            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate / freqOfToneArr[i]));
-//            double s = (i - (sample_size - 1) / 2) / (sigma*(sample_size - 1) / 2);
-//            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/freqOfTones))*Math.exp(-(s*s)/ 2);
-//            sample[i] = Math.sin(2 * Math.PI * i / (sampleRate/START_FREQ));
-        }
-
-        // convert to 16 bit pcm sound array
-        // assumes the sample buffer is normalised.
-
-        int idx = 0;
-        for (double dVal : sample) {
-            short val = (short) (dVal * 32767);
-            generatedSnd[idx++] = (byte) (val & 0x00ff);
-            generatedSnd[idx++] = (byte) ((val & 0xff00) >>> 8);
-        }
-    }
-
-    public void makeTone() {
-        int pcm_i = 0;
-        double sigma = 0.8;
-        double freqHz = 4000;
-//        if(pcm ==null || sample_size <= 0) return;
-        // make signal
-        sample_size = numSamples * DURATION_FREQ;
-        for (int i = 0; i < sample_size; i++) {
-            double s = (i - (sample_size - 1) / 2) / (sigma * (sample_size - 1) / 2);
-            short val =
-                    (short) (Math.sin(freqHz * 2 * Math.PI * i / sampleRate) * Math.exp(-(s * s) / 2) * 32767);
-            pcm[pcm_i++] = (byte) (val & 0xff);
-            pcm[pcm_i++] = (byte) ((val & 0xff00) >> 8);
-        }
-    }
-
-    public void clearTone() {
-        Arrays.fill(generatedSnd, (byte) 0);
-        Arrays.fill(pcm, (byte) 0);
-    }
-
-    public void playSound() {
-        AudioTrack audioTrack = new AudioTrack(AudioManager.STREAM_MUSIC, 8000,
-                AudioFormat.CHANNEL_CONFIGURATION_MONO, AudioFormat.ENCODING_PCM_16BIT,
-                numSamples * DURATION_FREQ, AudioTrack.MODE_STATIC);
-        audioTrack.write(generatedSnd, 0, numSamples * DURATION_FREQ);
-        audioTrack.play();
-    }
-
-    public void playSound2() {
-
-        try {
-            audioTrack =
-                    new AudioTrack.Builder().setAudioAttributes(new AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_MEDIA).setContentType(AudioAttributes.CONTENT_TYPE_MUSIC).build()).setAudioFormat(new AudioFormat.Builder().setEncoding(AudioFormat.ENCODING_PCM_16BIT).setSampleRate(sampleRate).setChannelMask(AudioFormat.CHANNEL_OUT_MONO).build()).setBufferSizeInBytes(getMinBufferSize(sampleRate, AudioFormat.CHANNEL_OUT_MONO, AudioFormat.ENCODING_PCM_16BIT)).build();
-
-            audioTrack.setVolume(1.0f);
-            audioTrack.write(pcm, 0, pcm.length);
-            audioTrack.play();
-        } catch (Exception e) {
-            Log.e("AnalyzeActivity", "playSound2() + " + e.toString());
         }
     }
 
@@ -641,8 +478,9 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                     detector.addFrequencyData(i, toTransform[0][i]);
                 }
             }
-            detector.showAcumulativeCount();
-            detector.updateTableContent(getApplicationContext());
+//            detector.showAcumulativeCount();
+//            detector.updateTableContent(getApplicationContext());
+            Log.d("CHIRP", String.valueOf(CHIRP_SEQ));
 
             Iterator iter = hzList.iterator();
             if (iter.hasNext() == true) {
@@ -674,36 +512,6 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
             chart.setData(data);
             chart.invalidate();
 
-        }
-    }
-
-    private class PlayAudio extends AsyncTask<Void, Void, Void> {
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-
-            try {
-//                makeTone();
-                while (!isCancelled()) {
-                    int value = 1;
-                    Thread.sleep(2000);
-//                    Handler toast_handler = new Handler(getMainLooper());
-//                    toast_handler.post(new Runnable() {
-//                        @Override
-//                        public void run() { Toast.makeText(getApplicationContext(), "PlayAudio",
-//                    Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//                    playSound();
-                    playSound2();
-                    Thread.sleep(2000);
-                    Log.d("RUNNABLE", "repeat chrip");
-                }
-
-            } catch (Throwable t) {
-                Log.e("PlayAudio", "PlayAudio Failed");
-            }
-            return null;
         }
     }
 
