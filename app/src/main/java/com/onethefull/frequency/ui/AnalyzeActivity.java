@@ -381,15 +381,17 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                 @Override
                 public void onNext(@NonNull Response<Void> voidResponse) {
                     // TODO: 여기에 정의하시면 됩니다!
-                    Log.d("TEST", "TEST");
+                    Log.d("CHIRP", voidResponse.toString());
                 }
 
                 @Override
                 public void onError(@NonNull Throwable e) {
+                    Log.d("CHIRP", e.toString());
                 }
 
                 @Override
                 public void onComplete() {
+                    Log.d("CHIRP", "compelete");
                 }
             });
         }
