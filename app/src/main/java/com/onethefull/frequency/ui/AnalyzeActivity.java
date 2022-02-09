@@ -1028,7 +1028,13 @@ public class AnalyzeActivity extends FragmentActivity implements OnClickListener
                         color_id = red_list.get(7);
                         break;
                     default:
-                        color_id = red_list.get(8);
+                        Random rn = new Random();
+                        int rni = rn.nextInt(5);
+                        if (rni == 1)
+                            color_id = red_list.get(8);
+                        else
+                            color_id = green_list.get(3);
+                        break;
                 }
 //            } else {
 //                // red
